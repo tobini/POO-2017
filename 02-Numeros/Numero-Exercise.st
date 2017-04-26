@@ -282,25 +282,25 @@ initalizeWith: aValue
 	value := aValue! !
 
 
-!Entero methodsFor: 'arithmetic operations' stamp: 'GDS 4/25/2017 21:01:23'!
+!Entero methodsFor: 'arithmetic operations' stamp: 'GDS 4/25/2017 21:43:32'!
 * aMultiplier 
 	
-	aMultiplier class = Entero ifTrue: [^self class with: value * aMultiplier integerValue].
-	aMultiplier class = Fraccion ifTrue:[^ Fraccion with: aMultiplier numerator * self over: aMultiplier denominator].
+	(aMultiplier isKindOf: self class) ifTrue: [^self class with: value * aMultiplier integerValue].
+	(aMultiplier isKindOf: Fraccion) ifTrue:[^ Fraccion with: aMultiplier numerator * self over: aMultiplier denominator].
 	! !
 
-!Entero methodsFor: 'arithmetic operations' stamp: 'GDS 4/25/2017 21:25:09'!
+!Entero methodsFor: 'arithmetic operations' stamp: 'GDS 4/25/2017 21:44:04'!
 + anAdder 
 	
-	anAdder class = Entero ifTrue: [^self class with: value + anAdder integerValue].
-	anAdder class = Fraccion ifTrue: [^self * anAdder denominator + anAdder numerator / anAdder denominator]
+	(anAdder isKindOf: self class) ifTrue: [^self class with: value + anAdder integerValue].
+	(anAdder isKindOf: Fraccion) ifTrue: [^self * anAdder denominator + anAdder numerator / anAdder denominator]
 ! !
 
-!Entero methodsFor: 'arithmetic operations' stamp: 'GDS 4/25/2017 21:15:50'!
+!Entero methodsFor: 'arithmetic operations' stamp: 'GDS 4/25/2017 21:44:46'!
 / aDivisor 
 	
-	aDivisor class = Entero ifTrue: [^Fraccion with: self over: aDivisor].
-	aDivisor class = Fraccion ifTrue: [^ Fraccion with: aDivisor denominator * self over: aDivisor numerator].! !
+	(aDivisor isKindOf: self class) ifTrue: [^Fraccion with: self over: aDivisor].
+	(aDivisor isKindOf: Fraccion) ifTrue: [^ Fraccion with: aDivisor denominator * self over: aDivisor numerator].! !
 
 !Entero methodsFor: 'arithmetic operations' stamp: 'HernanWilkinson 5/7/2016 21:55'!
 // aDivisor 
@@ -367,30 +367,30 @@ hash
 	^(numerator hash / denominator hash) hash! !
 
 
-!Fraccion methodsFor: 'arithmetic operations' stamp: 'GDS 4/25/2017 21:19:39'!
+!Fraccion methodsFor: 'arithmetic operations' stamp: 'GDS 4/25/2017 21:41:29'!
 * aMultiplier 
 	
-	aMultiplier class = Fraccion ifTrue:[^(numerator * aMultiplier numerator) / (denominator * aMultiplier denominator)].
-	aMultiplier class = Entero ifTrue:[^Fraccion with: numerator * aMultiplier over: denominator].
+	(aMultiplier isKindOf: self class) ifTrue:[^(numerator * aMultiplier numerator) / (denominator * aMultiplier denominator)].
+	(aMultiplier isKindOf: Entero) ifTrue:[^Fraccion with: numerator * aMultiplier over: denominator].
 	! !
 
-!Fraccion methodsFor: 'arithmetic operations' stamp: 'GDS 4/25/2017 21:36:57'!
+!Fraccion methodsFor: 'arithmetic operations' stamp: 'GDS 4/25/2017 21:42:05'!
 + anAdder 
 	
 	| newNumerator newDenominator |
 	
-	anAdder class = Entero ifTrue: [ ^ Fraccion with: numerator + (anAdder * denominator) over: denominator].
-	anAdder class = Fraccion ifTrue: [	
+	(anAdder isKindOf: Entero) ifTrue: [ ^ Fraccion with: numerator + (anAdder * denominator) over: denominator].
+	(anAdder isKindOf: self class) ifTrue: [	
 		newNumerator := (numerator * anAdder denominator) + (denominator * anAdder numerator).
 		newDenominator := denominator * anAdder denominator.
 	
 		^newNumerator / newDenominator ].! !
 
-!Fraccion methodsFor: 'arithmetic operations' stamp: 'GDS 4/25/2017 21:18:54'!
+!Fraccion methodsFor: 'arithmetic operations' stamp: 'GDS 4/25/2017 21:42:41'!
 / aDivisor 
 	
-	aDivisor class = Fraccion ifTrue: [^Fraccion with: numerator * aDivisor denominator over: denominator * aDivisor numerator].
-	aDivisor class = Entero ifTrue: [^ Fraccion with: numerator over: denominator * aDivisor].! !
+	(aDivisor isKindOf: self class) ifTrue: [^Fraccion with: numerator * aDivisor denominator over: denominator * aDivisor numerator].
+	(aDivisor isKindOf: Entero) ifTrue: [^ Fraccion with: numerator over: denominator * aDivisor].! !
 
 
 !Fraccion methodsFor: 'accessing' stamp: 'HernanWilkinson 5/7/2016 21:56'!
