@@ -1,4 +1,4 @@
-'From Cuis 5.0 of 7 November 2016 [latest update: #3081] on 4 June 2017 at 4:10:32 pm'!
+'From Cuis 5.0 of 7 November 2016 [latest update: #3086] on 4 June 2017 at 9:11:57 pm'!
 'Description Please enter a description for this package'!
 !provides: 'Distance-Solution' 1 0!
 !classDefinition: #Measure category: #'Distance-Solution'!
@@ -33,7 +33,7 @@ DistanceFactory class
 
 !classDefinition: #MeasureUnit category: #'Distance-Solution'!
 Object subclass: #MeasureUnit
-	instanceVariableNames: 'name defaultName category conversionMethod'
+	instanceVariableNames: 'name defaultName category amountThatRepresentsNothing conversionMethod inverseConversionMethod'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'Distance-Solution'!
@@ -52,61 +52,193 @@ XXX class
 	instanceVariableNames: ''!
 
 
-!Number methodsFor: '*Distance-Solution' stamp: 'GDS 6/4/2017 15:30:17'!
+!Number methodsFor: '*Distance-Solution' stamp: 'TVC 6/4/2017 20:52:53'!
 celsius
-	^ Measure withAmount: self andUnit: (MeasureUnit withName: 'celsius' andConversionMethod: [:temperatureAmountIntThisUnit | temperatureAmountIntThisUnit - 273.15] andDefaultName: 'kelvin' andCategory: 'temperature')! !
+	^ Measure 
+		withAmount: self 
+		andUnit: (
+			MeasureUnit 
+				withName: 'celsius' 
+				andConversionMethod: [:temperatureAmountIntThisUnit | temperatureAmountIntThisUnit + 273.15] 
+				andInverseConversionMethod: [:temperatureAmountInDefaultUnit | temperatureAmountInDefaultUnit - 273.15] 
+				andAmountValueThatRepresentsNothing: -273.15
+				andDefaultName: 'kelvin' 
+				andCategory: 'temperature'
+				)! !
 
-!Number methodsFor: '*Distance-Solution' stamp: 'GDS 6/4/2017 15:25:52'!
+!Number methodsFor: '*Distance-Solution' stamp: 'TVC 6/4/2017 20:52:42'!
 centimeters
-	^ Measure withAmount: self andUnit: (MeasureUnit withName: 'centimeter' andConversionMethod: [:distanceAmountInThisUnit | distanceAmountInThisUnit * 100] andDefaultName: 'meter' andCategory: 'distance')! !
+	^ Measure 
+		withAmount: self 
+		andUnit: (
+			MeasureUnit 
+				withName: 'centimeter' 
+				andConversionMethod: [:distanceAmountInThisUnit | distanceAmountInThisUnit / 100] 
+				andInverseConversionMethod: [:distanceAmountInDefaultUnit | distanceAmountInDefaultUnit * 100] 
+				andAmountValueThatRepresentsNothing: 0
+				andDefaultName: 'meter' 
+				andCategory: 'distance'
+				)! !
 
-!Number methodsFor: '*Distance-Solution' stamp: 'GDS 6/4/2017 14:24:11'!
+!Number methodsFor: '*Distance-Solution' stamp: 'TVC 6/4/2017 20:53:31'!
 dolars
-	^ Measure withAmount: self andUnit: (MeasureUnit withName: 'dolar' andConversionMethod: [:dolarAmountInThisUnit | dolarAmountInThisUnit * 1] andDefaultName: 'dolar' andCategory: 'dolar')! !
+	^ Measure 
+		withAmount: self 
+		andUnit: (
+			MeasureUnit 
+				withName: 'dolar' 
+				andConversionMethod: [:dolarAmountInThisUnit | dolarAmountInThisUnit * 1] 
+				andInverseConversionMethod: [:dolarAmountInDefaultUnit | dolarAmountInDefaultUnit / 1] 
+				andAmountValueThatRepresentsNothing: 0
+				andDefaultName: 'dolar' 
+				andCategory: 'dolar'
+				)! !
 
-!Number methodsFor: '*Distance-Solution' stamp: 'GDS 6/4/2017 15:31:17'!
+!Number methodsFor: '*Distance-Solution' stamp: 'TVC 6/4/2017 20:54:15'!
 fahrenheit
-	^ Measure withAmount: self andUnit: (MeasureUnit withName: 'fahrenheit' andConversionMethod: [:temperatureAmountInThisUnit | (temperatureAmountInThisUnit + 459.67) * (5/9)] andDefaultName: 'kelvin' andCategory: 'temperature')! !
+	^ Measure 
+		withAmount: self 
+		andUnit: (
+			MeasureUnit 
+				withName: 'fahrenheit' 
+				andConversionMethod: [:temperatureAmountInThisUnit | (temperatureAmountInThisUnit + 459.67) * (5/9)]
+				andInverseConversionMethod: [:temperatureAmountInDefaultUnit | (temperatureAmountInDefaultUnit * (9/5)) - 459.67] 
+				andAmountValueThatRepresentsNothing: -459.67
+				andDefaultName: 'kelvin' 
+				andCategory: 'temperature'
+				)! !
 
-!Number methodsFor: '*Distance-Solution' stamp: 'GDS 6/4/2017 14:26:13'!
+!Number methodsFor: '*Distance-Solution' stamp: 'TVC 6/4/2017 20:54:56'!
 grams
-	^ Measure withAmount: self andUnit: (MeasureUnit withName: 'gram' andConversionMethod: [:weightAmountInThisUnit | weightAmountInThisUnit * 1] andDefaultName: 'gram' andCategory: 'weight').! !
+	^ Measure 
+		withAmount: self 
+		andUnit: (
+			MeasureUnit 
+				withName: 'gram' 
+				andConversionMethod: [:weightAmountInThisUnit | weightAmountInThisUnit * 1] 
+				andInverseConversionMethod: [:weightAmountInDefaultUnit | weightAmountInDefaultUnit / 1] 
+				andAmountValueThatRepresentsNothing: 0
+				andDefaultName: 'gram' 
+				andCategory: 'weight'
+				).! !
 
-!Number methodsFor: '*Distance-Solution' stamp: 'GDS 6/4/2017 15:26:05'!
+!Number methodsFor: '*Distance-Solution' stamp: 'TVC 6/4/2017 20:55:40'!
+kelvin
+
+	^ Measure 
+		withAmount: self 
+		andUnit: (
+			MeasureUnit 
+				withName: 'kelvin' 
+				andConversionMethod: [:temperatureAmountIntThisUnit | temperatureAmountIntThisUnit] 
+				andInverseConversionMethod: [:temperatureAmountInDefaultUnit | temperatureAmountInDefaultUnit] 
+				andAmountValueThatRepresentsNothing: 0
+				andDefaultName: 'kelvin' 
+				andCategory: 'temperature'
+				)! !
+
+!Number methodsFor: '*Distance-Solution' stamp: 'TVC 6/4/2017 20:56:25'!
 kilograms
-	^ Measure withAmount: self andUnit: (MeasureUnit withName: 'kilogram' andConversionMethod: [:weightAmountInThisUnit | weightAmountInThisUnit / 1000] andDefaultName: 'gram' andCategory: 'weight').! !
+	^ Measure 
+		withAmount: self 
+		andUnit: (
+			MeasureUnit 
+				withName: 'kilogram' 
+				andConversionMethod: [:weightAmountInThisUnit | weightAmountInThisUnit * 1000] 
+				andInverseConversionMethod: [:weightAmountInDefaultUnit | weightAmountInDefaultUnit / 1000] 
+				andAmountValueThatRepresentsNothing: 0
+				andDefaultName: 'gram' 
+				andCategory: 'weight'
+				).! !
 
-!Number methodsFor: '*Distance-Solution' stamp: 'GDS 6/4/2017 15:29:52'!
+!Number methodsFor: '*Distance-Solution' stamp: 'TVC 6/4/2017 20:57:11'!
 kilometers
-	^ Measure withAmount: self andUnit: (MeasureUnit withName: 'kilometer' andConversionMethod: [:distanceAmountInThisUnit | distanceAmountInThisUnit / 1000] andDefaultName: 'meter' andCategory: 'distance')! !
+	^ Measure 
+		withAmount: self 
+		andUnit: (
+			MeasureUnit 
+				withName: 'kilometer' 
+				andConversionMethod: [:distanceAmountInThisUnit | distanceAmountInThisUnit * 1000] 
+				andInverseConversionMethod: [:distanceAmountInDefaultUnit | distanceAmountInDefaultUnit / 1000] 
+				andAmountValueThatRepresentsNothing: 0
+				andDefaultName: 'meter' 
+				andCategory: 'distance'
+				)! !
 
-!Number methodsFor: '*Distance-Solution' stamp: 'GDS 6/4/2017 14:27:26'!
+!Number methodsFor: '*Distance-Solution' stamp: 'TVC 6/4/2017 20:58:19'!
 meters
-	^ Measure withAmount: self andUnit: (MeasureUnit withName: 'meter' andConversionMethod: [:distanceAmountInThisUnit | distanceAmountInThisUnit * 1]  andDefaultName: 'meter' andCategory: 'distance')! !
+	^ Measure 
+		withAmount: self 
+		andUnit: (
+			MeasureUnit 
+				withName: 'meter' 
+				andConversionMethod: [:distanceAmountInThisUnit | distanceAmountInThisUnit * 1]  
+				andInverseConversionMethod: [:distanceAmountInDefaultUnit | distanceAmountInDefaultUnit / 1] 
+				andAmountValueThatRepresentsNothing: 0
+				andDefaultName: 'meter' 
+				andCategory: 'distance'
+				)! !
 
-!Number methodsFor: '*Distance-Solution' stamp: 'GDS 6/4/2017 15:29:31'!
+!Number methodsFor: '*Distance-Solution' stamp: 'TVC 6/4/2017 20:58:45'!
 millimeters
-	^ Measure withAmount: self andUnit: (MeasureUnit withName: 'millimeter' andConversionMethod: [:distanceAmountInThisUnit | distanceAmountInThisUnit / 1000]  andDefaultName: 'meter' andCategory: 'distance').! !
+	^ Measure 
+		withAmount: self 
+		andUnit: (
+			MeasureUnit 
+				withName: 'millimeter' 
+				andConversionMethod: [:distanceAmountInThisUnit | distanceAmountInThisUnit / 1000]  
+				andInverseConversionMethod: [:distanceAmountInDefaultUnit | distanceAmountInDefaultUnit * 1000] 
+				andAmountValueThatRepresentsNothing: 0
+				andDefaultName: 'meter' 
+				andCategory: 'distance'
+				)! !
 
-!Number methodsFor: '*Distance-Solution' stamp: 'GDS 6/4/2017 15:27:28'!
+!Number methodsFor: '*Distance-Solution' stamp: 'TVC 6/4/2017 20:59:08'!
 pesos
-	^ Measure withAmount: self andUnit: (MeasureUnit withName: 'peso' andConversionMethod: [:pesosAmountInThisUnit | pesosAmountInThisUnit * 1] andDefaultName: 'peso' andCategory: 'peso')! !
+	^ Measure 
+		withAmount: self 
+		andUnit: (
+			MeasureUnit 
+				withName: 'peso' 
+				andConversionMethod: [:pesosAmountInThisUnit | pesosAmountInThisUnit * 1] 
+				andInverseConversionMethod: [:pesosAmountInDefaultUnit | pesosAmountInDefaultUnit * 1] 
+				andAmountValueThatRepresentsNothing: 0
+				andDefaultName: 'peso' 
+				andCategory: 'peso')! !
 
 !Measure methodsFor: 'as yet unclassified' stamp: 'GDS 6/4/2017 11:32:59'!
 * anAmount 
 	^ self class withAmount: amount * anAmount andUnit: unit.! !
 
-!Measure methodsFor: 'as yet unclassified' stamp: 'GDS 6/4/2017 14:18:48'!
+!Measure methodsFor: 'as yet unclassified' stamp: 'TVC 6/4/2017 20:46:20'!
 + aMeasure
 
 	(self canAdd: aMeasure) ifFalse: [ ^ XXX with: self andOther: aMeasure ] .
-	^ self class withAmount: (self convertToDefaultUnit amount) + (aMeasure convertToDefaultUnit amount) andUnit: (unit class withName: unit defaultName andConversionMethod: [:distanceAmountInThisUnit | distanceAmountInThisUnit * 1] andDefaultName: unit defaultName andCategory: unit category).! !
+	^ self class 
+		withAmount: (self convertToDefaultUnit amount) + (aMeasure convertToDefaultUnit amount) 
+		andUnit: (
+			unit class withName: unit defaultName 
+			andConversionMethod: [:distanceAmountInThisUnit | distanceAmountInThisUnit * 1] 
+			andInverseConversionMethod: [:distanceAmountInDefaultUnit | distanceAmountInDefaultUnit / 1] 
+			andAmountValueThatRepresentsNothing: unit amountThatRepresentsNothing 
+			andDefaultName: unit defaultName 
+			andCategory: unit category
+			).! !
 
-!Measure methodsFor: 'as yet unclassified' stamp: 'GDS 6/4/2017 14:20:33'!
+!Measure methodsFor: 'as yet unclassified' stamp: 'TVC 6/4/2017 20:46:46'!
 - aMeasure
 
 	(self canAdd: aMeasure) ifFalse: [ ^ XXX with: self andOther: aMeasure ] .
-	^ self class withAmount: (self convertToDefaultUnit amount) - (aMeasure convertToDefaultUnit amount) andUnit: (unit class withName: unit defaultName andConversionMethod: [:distanceAmountInThisUnit | distanceAmountInThisUnit * 1] andDefaultName: unit defaultName andCategory: unit category).! !
+	^ self class 
+		withAmount: (self convertToDefaultUnit amount) - (aMeasure convertToDefaultUnit amount) 
+		andUnit: (
+			unit class withName: unit defaultName 
+			andConversionMethod: [:distanceAmountInThisUnit | distanceAmountInThisUnit * 1] 
+			andInverseConversionMethod: [:distanceAmountInDefaultUnit | distanceAmountInDefaultUnit / 1] 
+			andAmountValueThatRepresentsNothing: unit amountThatRepresentsNothing 
+			andDefaultName: unit defaultName 
+			andCategory: unit category
+			).! !
 
 !Measure methodsFor: 'as yet unclassified' stamp: 'GDS 6/4/2017 11:35:12'!
 / aNumber 
@@ -117,11 +249,12 @@ pesos
 
 	^ self convertToDefaultUnit amount < aMeasure convertToDefaultUnit amount! !
 
-!Measure methodsFor: 'as yet unclassified' stamp: 'GDS 6/4/2017 13:46:15'!
+!Measure methodsFor: 'as yet unclassified' stamp: 'TVC 6/4/2017 20:38:00'!
 = aMeasure
 	
-	(amount = 0 and: [aMeasure amount = 0]) ifTrue: [^ true].
-	^ (aMeasure isKindOf: self class) and: [(unit category = aMeasure unit category) and: [amount = (aMeasure convertTo: unit) amount]].! !
+	^ (aMeasure isKindOf: self class) and: [
+		(self isNothing and: [aMeasure isNothing]) or: [(unit category = aMeasure unit category) and: [amount = (aMeasure convertTo: unit) amount]]
+	].! !
 
 !Measure methodsFor: 'as yet unclassified' stamp: 'GDS 6/4/2017 11:35:44'!
 adaptToNumber: aSmallInteger andSend: aSymbol 
@@ -139,16 +272,26 @@ canAdd: aMeasure
 canConvert: aMeasureUnit 
 	^ unit category = aMeasureUnit category! !
 
-!Measure methodsFor: 'as yet unclassified' stamp: 'GDS 6/4/2017 14:13:34'!
+!Measure methodsFor: 'as yet unclassified' stamp: 'TVC 6/4/2017 19:05:42'!
 convertTo: aUnit
 	
 	(self canConvert: aUnit) ifFalse: [ self error: 'Cannot convert to unit'].
-	^ self class withAmount:  (aUnit applyConversionMethodTo: self convertToDefaultUnit amount) andUnit: aUnit! !
+	^ self class withAmount:  (aUnit applyInverseConversionMethodTo: self convertToDefaultUnit amount) andUnit: aUnit! !
 
-!Measure methodsFor: 'as yet unclassified' stamp: 'GDS 6/4/2017 15:09:33'!
+!Measure methodsFor: 'as yet unclassified' stamp: 'TVC 6/4/2017 20:48:40'!
 convertToDefaultUnit
 
-	^ self class new initializeWithAmount: (unit applyConversionMethodTo: amount) andUnit: (MeasureUnit withName: unit defaultName andConversionMethod: unit conversionMethod andDefaultName: unit defaultName andCategory: unit category)! !
+	^ self class new 
+		initializeWithAmount: (unit applyConversionMethodTo: amount) 
+		andUnit: (
+			MeasureUnit 
+				withName: unit defaultName 
+				andConversionMethod: [:distanceAmountInThisUnit | distanceAmountInThisUnit * 1] 
+				andInverseConversionMethod: [:distanceAmountInDefaultUnit | distanceAmountInDefaultUnit / 1] 
+				andAmountValueThatRepresentsNothing: unit amountThatRepresentsNothing
+				andDefaultName: unit defaultName 
+				andCategory: unit category
+			)! !
 
 !Measure methodsFor: 'as yet unclassified' stamp: 'GDS 6/4/2017 11:43:50'!
 hash
@@ -160,10 +303,15 @@ initializeWithAmount: anAmount andUnit: aWeightUnit
 	amount := anAmount .
 	unit := aWeightUnit .! !
 
-!Measure methodsFor: 'as yet unclassified' stamp: 'GDS 6/4/2017 14:20:47'!
+!Measure methodsFor: 'as yet unclassified' stamp: 'TVC 6/4/2017 20:39:32'!
+isNothing
+
+	^ amount = unit amountThatRepresentsNothing! !
+
+!Measure methodsFor: 'as yet unclassified' stamp: 'TVC 6/4/2017 19:26:01'!
 negated
 
-	^ self class withAmount: amount negated andUnit: (unit class withName: unit defaultName andConversionMethod: [:distanceAmountInThisUnit | distanceAmountInThisUnit * 1] andDefaultName: unit defaultName andCategory: unit category).! !
+	^ self class withAmount: amount negated andUnit: unit.! !
 
 !Measure methodsFor: 'as yet unclassified' stamp: 'GDS 6/4/2017 11:48:32'!
 printOn: aStream 
@@ -199,7 +347,7 @@ withAmount: anAmount andUnit: aDistanceUnit
 
 	^ self new initializeWithAmount: anAmount andUnit: aDistanceUnit! !
 
-!MeasureTest methodsFor: 'setup' stamp: 'GDS 6/4/2017 14:21:05'!
+!MeasureTest methodsFor: 'setup' stamp: 'TVC 6/4/2017 20:49:03'!
 setUp
 	aMeter := 1 meters.
 	halfAMeter := (1/2) meters.
@@ -214,7 +362,7 @@ setUp
 	hundredGrams := 100 grams.
 	oneThousandOneHundredGrams := 1100 grams.
 	tenPesos := 10 pesos.
-	meterUnit := MeasureUnit withName: 'meter' andConversionMethod: [:distanceAmountInThisUnit | distanceAmountInThisUnit * 1] andDefaultName: 'meter' andCategory: 'distance'! !
+	meterUnit := MeasureUnit withName: 'meter' andConversionMethod: [:distanceAmountInThisUnit | distanceAmountInThisUnit * 1] andInverseConversionMethod: [:distanceAmountInDefaultUnit | distanceAmountInDefaultUnit / 1] andAmountValueThatRepresentsNothing: 0 andDefaultName: 'meter' andCategory: 'distance'! !
 
 !MeasureTest methodsFor: 'Testing' stamp: 'GDS 5/23/2017 19:54:21'!
 test01MeterIsEqualToHimself
@@ -370,15 +518,21 @@ test30TheDifferenceOfTwoMeasuresWithDifferentTypeIsNotEqualsToASumOfMeasuresWith
 	
 	self deny: 10 pesos - 50 dolars = (10 pesos - 50 pesos).! !
 
-!MeasureTest methodsFor: 'Testing' stamp: 'GDS 6/4/2017 14:48:00'!
-test31NothingIsSameToNothing
+!MeasureTest methodsFor: 'Testing' stamp: 'TVC 6/4/2017 19:58:11'!
+test31NothingIsEqualToNothing
 	
 	self assert: 0 pesos = 0 meters.! !
 
-!MeasureTest methodsFor: 'Testing' stamp: 'GDS 6/4/2017 14:47:41'!
-test32
+!MeasureTest methodsFor: 'Testing' stamp: 'TVC 6/4/2017 20:20:10'!
+test32MeasuresCanRepresentNothingWithOtherValueThan0
 	
-	self assert: -273.15 celsius = -459.67 fahrenheit.! !
+	self deny: 0 celsius = 0 fahrenheit.! !
+
+!MeasureTest methodsFor: 'Testing' stamp: 'TVC 6/4/2017 21:05:15'!
+test33NothingForTemperaturesIsRepresentedByItsCorrectPhysicsEstimatedValue
+	
+	self assert: 0 kelvin = -273.15 celsius.
+	self assert: 0 kelvin = -459.67 fahrenheit.! !
 
 !DistanceFactory methodsFor: 'instances-creation' stamp: 'GDS 5/29/2017 19:58:02'!
 minusOneMeter
@@ -413,10 +567,20 @@ zeroMeters
 
 	^ (aWeightUnit isKindOf: self class) and: [name = aWeightUnit name and: [ category = aWeightUnit category ]].! !
 
+!MeasureUnit methodsFor: 'accessing' stamp: 'TVC 6/4/2017 20:43:25'!
+amountThatRepresentsNothing
+
+	^ amountThatRepresentsNothing ! !
+
 !MeasureUnit methodsFor: 'as yet unclassified' stamp: 'GDS 6/4/2017 14:09:45'!
 applyConversionMethodTo: aNumber
 
 	^ conversionMethod value: aNumber! !
+
+!MeasureUnit methodsFor: 'as yet unclassified' stamp: 'TVC 6/4/2017 19:12:23'!
+applyInverseConversionMethodTo: aNumber 
+	
+	^ inverseConversionMethod value: aNumber! !
 
 !MeasureUnit methodsFor: 'accessing' stamp: 'GDS 6/4/2017 12:46:44'!
 category
@@ -437,16 +601,18 @@ name
 	
 		^ name! !
 
-!MeasureUnit methodsFor: 'as yet unclassified' stamp: 'GDS 6/4/2017 14:32:38'!
-withName: aName andConversionMethod: aConversionMethod andDefaultName: aDefaultName andCategory: aCategory
+!MeasureUnit methodsFor: 'as yet unclassified' stamp: 'TVC 6/4/2017 21:00:08'!
+withName: aName andConversionMethod: aConversionMethod andInverseConversionMethod: anInverseConversionMethod andAmountValueThatRepresentsNothing: anAmount andDefaultName: aDefaultName andCategory: aCategory
 	name := aName.
 	conversionMethod := aConversionMethod.
+	inverseConversionMethod := anInverseConversionMethod.
+	amountThatRepresentsNothing := anAmount.
 	defaultName := aDefaultName.
 	category  := aCategory.! !
 
-!MeasureUnit class methodsFor: 'as yet unclassified' stamp: 'GDS 6/4/2017 14:44:02'!
-withName: aName andConversionMethod: aConversionMethod andDefaultName: aDefaultName andCategory: aCategory
-	^ self new withName: aName andConversionMethod: aConversionMethod andDefaultName: aDefaultName andCategory: aCategory ! !
+!MeasureUnit class methodsFor: 'as yet unclassified' stamp: 'TVC 6/4/2017 20:40:43'!
+withName: aName andConversionMethod: aConversionMethod andInverseConversionMethod: anInverseConversionMethod andAmountValueThatRepresentsNothing: anAmount andDefaultName: aDefaultName andCategory: aCategory
+	^ self new withName: aName andConversionMethod: aConversionMethod andInverseConversionMethod: anInverseConversionMethod andAmountValueThatRepresentsNothing: anAmount andDefaultName: aDefaultName andCategory: aCategory ! !
 
 !XXX methodsFor: 'as yet unclassified' stamp: 'GDS 6/4/2017 13:10:26'!
 = anotherXXX
