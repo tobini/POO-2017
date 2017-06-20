@@ -40,13 +40,15 @@ test06DoingCheckoutWithACartWithASingleItemWorks
 	ticket := cashier checkout: cart.
 	self assert: ticket equals: donQuijotePrice.! !
 
-!XXXTest methodsFor: 'as yet unclassified' stamp: 'TVC 6/18/2017 19:34:17'!
-test07CannotModifyCartWhenAccessingToItsItems
-	| cartItems |
+!XXXTest methodsFor: 'as yet unclassified' stamp: 'TVC 6/20/2017 12:38:32'!
+test07CannotModifyCartWhenAccessingItsItems
+	| oldCart cartItems |
+	
 	cart add: donQuijote.
+	oldCart := cart copy.
 	cartItems := cart items.
 	cartItems remove: donQuijote.
-	self assert: cart items size equals: 1! !
+	self assert: oldCart equals: cart.! !
 
 !XXXTest methodsFor: 'as yet unclassified' stamp: 'TVC 6/18/2017 19:34:08'!
 test08DoingCheckoutWithACartWithMultipleItemsWorks
@@ -81,6 +83,56 @@ test12AddingACartWithAFractionalAmountOfOccurrencesRaisesAnError
 		self assert: cart size equals: 0.
 		].! !
 
+!XXXTest methodsFor: 'as yet unclassified' stamp: 'TVC 6/20/2017 11:41:28'!
+test13CannotAddMultipleTimesAnItemThatDoesNotBelongToTheEditorial
+	self should: [cart add: itemThatDoesNotBelongToEditorial withOccurrences: 5] raise: Error - MessageNotUnderstood withExceptionDo: [:anError | 
+		self assert: anError messageText = cart class errorMessageForCaseItemIsAddedAndItDoesNotBelongToEditorial . 
+		self assert: cart size equals: 0.
+	].! !
+
+!XXXTest methodsFor: 'as yet unclassified' stamp: 'TVC 6/20/2017 11:46:56'!
+test14CannotAddAnItemToACatalogWithANegativePrice
+	self should: [catalog addItem: itemThatDoesNotBelongToEditorial withPrice: -50] raise: Error - MessageNotUnderstood withExceptionDo: [:anError | 
+		self assert: anError messageText = catalog class errorMessageWhenAddingAnItemWithNegativeValue . 
+		self deny: (catalog includes: itemThatDoesNotBelongToEditorial).
+	].! !
+
+!XXXTest methodsFor: 'as yet unclassified' stamp: 'TVC 6/20/2017 11:52:13'!
+test15CannotAddAnItemThatIsAlreadyInTheList
+	self should: [catalog addItem: donQuijote withPrice: 99] raise: Error - MessageNotUnderstood withExceptionDo: [:anError | 
+		self assert: anError messageText = catalog class errorMessageWhenAddingAnItemThatIsAlreadyInTheCatalog . 
+		self assert: (catalog includes: donQuijote).
+		self assert: (catalog priceFor: donQuijote) equals: donQuijotePrice.
+	].! !
+
+!XXXTest methodsFor: 'as yet unclassified' stamp: 'TVC 6/20/2017 12:15:23'!
+test16CanModifyPriceOfAnItemThatIsAlreadyInTheCatalog
+	| oldCatalog newCatalog |
+	oldCatalog := catalog copy.
+	newCatalog := catalog modifyItem: donQuijote withPrice: 99.
+	self assert: (newCatalog priceFor: donQuijote) equals: 99.
+	self assert: oldCatalog equals: catalog.
+	! !
+
+!XXXTest methodsFor: 'as yet unclassified' stamp: 'TVC 6/20/2017 12:32:37'!
+test17CannotModifyCatalogWhenAccessingItsItemsAndPrices
+	| catalogItemsAndPrices oldCatalog |
+	oldCatalog := catalog copy.
+	catalogItemsAndPrices := catalog itemsAndPrices.
+	catalogItemsAndPrices removeKey: donQuijote.
+	self assert: oldCatalog equals: catalog.
+	! !
+
+!XXXTest methodsFor: 'as yet unclassified' stamp: 'TVC 6/20/2017 12:42:26'!
+test18CannotModifyPriceOfAnItemThatDoesNotBelongToTheCatalog
+	| oldCatalog |
+	oldCatalog := catalog copy.
+	self should: [catalog modifyItem: itemThatDoesNotBelongToEditorial withPrice: 99] raise: Error - MessageNotUnderstood withExceptionDo: [:anError | 
+			self assert: anError messageText equals: catalog class errorMessageWhenModifyingAnItemThatDoesNotBelongToTheCatalog.
+			self assert: oldCatalog equals: catalog.
+		].
+	! !
+
 
 !XXXTest methodsFor: 'setUp' stamp: 'TVC 6/18/2017 19:08:35'!
 setUp
@@ -105,16 +157,6 @@ Object subclass: #Cart
 	poolDictionaries: ''
 	category: 'TusLibros-Solution'!
 
-!Cart methodsFor: 'as yet unclassified' stamp: 'GDS 6/15/2017 20:30:50'!
-add: anItem 
-	self checkIfItemBelongsToTheEditorial: anItem.
-	items add: anItem! !
-
-!Cart methodsFor: 'as yet unclassified' stamp: 'TVC 6/18/2017 18:54:25'!
-checkIfItemBelongsToTheEditorial: anItem
-	^ (catalog includes: anItem) ifFalse: [self error: self class errorMessageForCaseItemIsAddedAndItDoesNotBelongToEditorial]! !
-
-
 !Cart methodsFor: 'initialization' stamp: 'TVC 6/18/2017 18:25:15'!
 initializeWithCatalog: aCatalog
 	items := Bag new.
@@ -135,12 +177,28 @@ isEmpty
 	^ items isEmpty! !
 
 
-!Cart methodsFor: 'adding' stamp: 'TVC 6/18/2017 19:33:10'!
+!Cart methodsFor: 'adding' stamp: 'GDS 6/15/2017 20:30:50'!
+add: anItem 
+	self checkIfItemBelongsToTheEditorial: anItem.
+	items add: anItem! !
+
+!Cart methodsFor: 'adding' stamp: 'TVC 6/20/2017 11:41:52'!
 add: anItem withOccurrences: anAmountOfOccurrences 
 	(anAmountOfOccurrences > 0) ifTrue: [
 		anAmountOfOccurrences isInteger ifFalse: [self error: self class errorMessageForFractionalAmountOfOccurrencesForAnItem].
+		self checkIfItemBelongsToTheEditorial: anItem.
 		items add: anItem withOccurrences: anAmountOfOccurrences
 	]! !
+
+
+!Cart methodsFor: 'validations' stamp: 'TVC 6/18/2017 18:54:25'!
+checkIfItemBelongsToTheEditorial: anItem
+	^ (catalog includes: anItem) ifFalse: [self error: self class errorMessageForCaseItemIsAddedAndItDoesNotBelongToEditorial]! !
+
+
+!Cart methodsFor: 'comparing' stamp: 'TVC 6/20/2017 12:38:12'!
+= anObject
+	^ (anObject isKindOf: self class) and: [anObject items = items].! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -214,14 +272,24 @@ Object subclass: #Catalog
 initialize
 	itemsAndPrices := Dictionary new.! !
 
+!Catalog methodsFor: 'initialization' stamp: 'TVC 6/20/2017 12:06:36'!
+initializeWithItemsAndPrices: someItemsAndPrices 
+	itemsAndPrices := someItemsAndPrices.! !
 
-!Catalog methodsFor: 'adding' stamp: 'TVC 6/18/2017 18:46:39'!
+
+!Catalog methodsFor: 'adding' stamp: 'TVC 6/20/2017 12:45:21'!
 addItem: anItem withPrice: aPrice
 	| itemAndPrice |
+	
+	self checkThatAnItem: anItem isValidToBeAddedWithPrice: aPrice.
 	
 	itemAndPrice := Association key: anItem value: aPrice.
 	itemsAndPrices add: itemAndPrice.! !
 
+
+!Catalog methodsFor: 'accessing' stamp: 'TVC 6/20/2017 12:32:18'!
+itemsAndPrices
+	^ itemsAndPrices copy! !
 
 !Catalog methodsFor: 'accessing' stamp: 'TVC 6/18/2017 18:49:30'!
 priceFor: anItem
@@ -232,6 +300,42 @@ priceFor: anItem
 includes: anItem 
 	^ itemsAndPrices includesKey: anItem! !
 
+
+!Catalog methodsFor: 'modifying' stamp: 'TVC 6/20/2017 12:52:50'!
+modifyItem: anItem withPrice: aPrice
+	| newItemsAndPrices newCatalog |
+	
+	newItemsAndPrices := itemsAndPrices copy.
+	newItemsAndPrices removeKey: anItem ifAbsent: [self error: self class errorMessageWhenModifyingAnItemThatDoesNotBelongToTheCatalog ].
+	newCatalog := self class newWithItemsAndPrices: newItemsAndPrices.
+	newCatalog addItem: anItem withPrice: aPrice.
+
+	^ newCatalog! !
+
+
+!Catalog methodsFor: 'comparing' stamp: 'TVC 6/20/2017 12:36:34'!
+= anObject
+	^ (anObject isKindOf: self class) and: [anObject itemsAndPrices = itemsAndPrices].! !
+
+
+!Catalog methodsFor: 'copying' stamp: 'TVC 6/20/2017 12:32:57'!
+copy
+	^ self veryDeepCopy! !
+
+
+!Catalog methodsFor: 'validations' stamp: 'TVC 6/20/2017 12:48:37'!
+checkItemIsNotAlreadyInTheCatalog: anItem
+	(self includes: anItem) ifTrue: [self error: self class errorMessageWhenAddingAnItemThatIsAlreadyInTheCatalog ].! !
+
+!Catalog methodsFor: 'validations' stamp: 'TVC 6/20/2017 12:48:10'!
+checkPriceIsNotNegative: aPrice 
+	(aPrice < 0) ifTrue: [self error: self class errorMessageWhenAddingAnItemWithNegativeValue ].! !
+
+!Catalog methodsFor: 'validations' stamp: 'TVC 6/20/2017 12:47:29'!
+checkThatAnItem: anItem isValidToBeAddedWithPrice: aPrice
+	self checkPriceIsNotNegative: aPrice.
+	self checkItemIsNotAlreadyInTheCatalog: anItem.! !
+
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
 !classDefinition: 'Catalog class' category: #'TusLibros-Solution'!
@@ -241,3 +345,21 @@ Catalog class
 !Catalog class methodsFor: 'as yet unclassified' stamp: 'TVC 6/18/2017 18:47:06'!
 newXXX
 	^ self new initialize.! !
+
+
+!Catalog class methodsFor: 'error messages' stamp: 'TVC 6/20/2017 11:53:15'!
+errorMessageWhenAddingAnItemThatIsAlreadyInTheCatalog
+	^ 'Cannot add an Item that is already in the catalog'! !
+
+!Catalog class methodsFor: 'error messages' stamp: 'TVC 6/20/2017 11:47:28'!
+errorMessageWhenAddingAnItemWithNegativeValue
+	^ 'Cannot add an item with negative value to the list'! !
+
+!Catalog class methodsFor: 'error messages' stamp: 'TVC 6/20/2017 12:42:57'!
+errorMessageWhenModifyingAnItemThatDoesNotBelongToTheCatalog
+	^ 'Cannot modify an item that does not belong to the catalog'! !
+
+
+!Catalog class methodsFor: 'initialization' stamp: 'TVC 6/20/2017 12:05:49'!
+newWithItemsAndPrices: someItemsAndPrices 
+	^ self new initializeWithItemsAndPrices: someItemsAndPrices! !
