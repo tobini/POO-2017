@@ -1,46 +1,46 @@
 !classDefinition: #XXXTest category: #'TusLibros-Solution'!
 TestCase subclass: #XXXTest
-	instanceVariableNames: 'cart catalog cashier donQuijotePrice donQuijote itemThatDoesNotBelongToEditorial madameBovary madameBovaryPrice'
+	instanceVariableNames: 'cart catalog cashier donQuijotePrice donQuijote itemThatDoesNotBelongToEditorial madameBovary madameBovaryPrice anExpiredCreditCard aValidCreditCard salesBook thisMonth today'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TusLibros-Solution'!
 
-!XXXTest methodsFor: 'as yet unclassified' stamp: 'TVC 6/18/2017 16:31:54'!
+!XXXTest methodsFor: 'testing' stamp: 'TVC 6/18/2017 16:31:54'!
 test01NewCartIsEmpty
 	self assert: cart isEmpty! !
 
-!XXXTest methodsFor: 'as yet unclassified' stamp: 'TVC 6/18/2017 18:21:43'!
+!XXXTest methodsFor: 'testing' stamp: 'TVC 6/18/2017 18:21:43'!
 test02CartWithAnAddedItemIsNotEmpty
 	cart add: donQuijote.
 	self deny: cart isEmpty! !
 
-!XXXTest methodsFor: 'as yet unclassified' stamp: 'TVC 6/18/2017 19:34:35'!
+!XXXTest methodsFor: 'testing' stamp: 'TVC 6/18/2017 19:34:35'!
 test03CartWithTwoAddedItemsHasTwoItems
 	cart add: donQuijote.
 	cart add: donQuijote.
 	self assert: cart size equals: 2! !
 
-!XXXTest methodsFor: 'as yet unclassified' stamp: 'TVC 6/18/2017 19:34:31'!
+!XXXTest methodsFor: 'testing' stamp: 'TVC 6/18/2017 19:34:31'!
 test04CartWithOneAddedItemHasOneItems
 	cart add: donQuijote.
 	self assert: cart size equals: 1! !
 
-!XXXTest methodsFor: 'as yet unclassified' stamp: 'TVC 6/18/2017 19:34:21'!
+!XXXTest methodsFor: 'testing' stamp: 'TVC 6/18/2017 19:34:21'!
 test05CannotAddAnItemThatDoesNotBelongToTheEditorial
 	self should: [cart add: itemThatDoesNotBelongToEditorial] raise: Error - MessageNotUnderstood withExceptionDo: [:anError | 
 		self assert: anError messageText = cart class errorMessageForCaseItemIsAddedAndItDoesNotBelongToEditorial . 
 		self assert: cart size equals: 0.
 	].! !
 
-!XXXTest methodsFor: 'as yet unclassified' stamp: 'TVC 6/18/2017 19:34:26'!
-test06DoingCheckoutWithACartWithASingleItemWorks
+!XXXTest methodsFor: 'testing' stamp: 'TVC 6/20/2017 17:43:01'!
+test06DoingCheckoutOfACartWithASingleItemAndAValidCreditCardWorks
 	| ticket |
 	
 	cart add: donQuijote.
-	ticket := cashier checkout: cart.
+	ticket := cashier checkout: cart payingWith: aValidCreditCard on: today.
 	self assert: ticket equals: donQuijotePrice.! !
 
-!XXXTest methodsFor: 'as yet unclassified' stamp: 'TVC 6/20/2017 12:38:32'!
+!XXXTest methodsFor: 'testing' stamp: 'TVC 6/20/2017 12:38:32'!
 test07CannotModifyCartWhenAccessingItsItems
 	| oldCart cartItems |
 	
@@ -50,54 +50,54 @@ test07CannotModifyCartWhenAccessingItsItems
 	cartItems remove: donQuijote.
 	self assert: oldCart equals: cart.! !
 
-!XXXTest methodsFor: 'as yet unclassified' stamp: 'TVC 6/18/2017 19:34:08'!
-test08DoingCheckoutWithACartWithMultipleItemsWorks
+!XXXTest methodsFor: 'testing' stamp: 'TVC 6/20/2017 17:43:34'!
+test08DoingCheckoutOfACartWithMultipleItemsAndWithAValidCreditCardWorks
 	| ticket |
 	
 	cart add: donQuijote.
 	cart add: madameBovary.
-	ticket := cashier checkout: cart.
+	ticket := cashier checkout: cart payingWith: aValidCreditCard on: today.
 	self assert: ticket equals: donQuijotePrice + madameBovaryPrice.! !
 
-!XXXTest methodsFor: 'as yet unclassified' stamp: 'TVC 6/18/2017 19:33:51'!
+!XXXTest methodsFor: 'testing' stamp: 'TVC 6/20/2017 17:45:51'!
 test09DoingCheckoutWithAnEmptyCartRaisesAnError
-	self should: [cashier checkout: cart] raise: Error - MessageNotUnderstood withExceptionDo: [:anError | 
+	self should: [cashier checkout: cart payingWith: aValidCreditCard on: today] raise: Error - MessageNotUnderstood withExceptionDo: [:anError | 
 		self assert: anError messageText equals: cashier class errorMessageForEmptyCartCheckout. 
 		].! !
 
-!XXXTest methodsFor: 'as yet unclassified' stamp: 'TVC 6/18/2017 19:33:44'!
+!XXXTest methodsFor: 'testing' stamp: 'TVC 6/18/2017 19:33:44'!
 test10CanAddAnItemToTheCartWithMoreThanOneOcurrence
 	cart add: donQuijote withOccurrences: 150.
 	self assert: cart size equals: 150.! !
 
-!XXXTest methodsFor: 'as yet unclassified' stamp: 'TVC 6/18/2017 19:33:34'!
+!XXXTest methodsFor: 'testing' stamp: 'TVC 6/18/2017 19:33:34'!
 test11AddingACartWithNegativeOccurrencesDoesNotAffectTheCartSize
 	cart add: donQuijote.
 	cart add: donQuijote withOccurrences: -30.
 	self assert: cart size equals: 1.! !
 
-!XXXTest methodsFor: 'as yet unclassified' stamp: 'TVC 6/18/2017 19:32:11'!
+!XXXTest methodsFor: 'testing' stamp: 'TVC 6/18/2017 19:32:11'!
 test12AddingACartWithAFractionalAmountOfOccurrencesRaisesAnError
 	self should: [cart add: donQuijote withOccurrences: 25/32] raise: Error - MessageNotUnderstood withExceptionDo: [:anError | 
 		self assert: anError messageText equals: cart class errorMessageForFractionalAmountOfOccurrencesForAnItem. 
 		self assert: cart size equals: 0.
 		].! !
 
-!XXXTest methodsFor: 'as yet unclassified' stamp: 'TVC 6/20/2017 11:41:28'!
+!XXXTest methodsFor: 'testing' stamp: 'TVC 6/20/2017 11:41:28'!
 test13CannotAddMultipleTimesAnItemThatDoesNotBelongToTheEditorial
 	self should: [cart add: itemThatDoesNotBelongToEditorial withOccurrences: 5] raise: Error - MessageNotUnderstood withExceptionDo: [:anError | 
 		self assert: anError messageText = cart class errorMessageForCaseItemIsAddedAndItDoesNotBelongToEditorial . 
 		self assert: cart size equals: 0.
 	].! !
 
-!XXXTest methodsFor: 'as yet unclassified' stamp: 'TVC 6/20/2017 11:46:56'!
+!XXXTest methodsFor: 'testing' stamp: 'TVC 6/20/2017 11:46:56'!
 test14CannotAddAnItemToACatalogWithANegativePrice
 	self should: [catalog addItem: itemThatDoesNotBelongToEditorial withPrice: -50] raise: Error - MessageNotUnderstood withExceptionDo: [:anError | 
 		self assert: anError messageText = catalog class errorMessageWhenAddingAnItemWithNegativeValue . 
 		self deny: (catalog includes: itemThatDoesNotBelongToEditorial).
 	].! !
 
-!XXXTest methodsFor: 'as yet unclassified' stamp: 'TVC 6/20/2017 11:52:13'!
+!XXXTest methodsFor: 'testing' stamp: 'TVC 6/20/2017 11:52:13'!
 test15CannotAddAnItemThatIsAlreadyInTheList
 	self should: [catalog addItem: donQuijote withPrice: 99] raise: Error - MessageNotUnderstood withExceptionDo: [:anError | 
 		self assert: anError messageText = catalog class errorMessageWhenAddingAnItemThatIsAlreadyInTheCatalog . 
@@ -105,7 +105,7 @@ test15CannotAddAnItemThatIsAlreadyInTheList
 		self assert: (catalog priceFor: donQuijote) equals: donQuijotePrice.
 	].! !
 
-!XXXTest methodsFor: 'as yet unclassified' stamp: 'TVC 6/20/2017 12:15:23'!
+!XXXTest methodsFor: 'testing' stamp: 'TVC 6/20/2017 12:15:23'!
 test16CanModifyPriceOfAnItemThatIsAlreadyInTheCatalog
 	| oldCatalog newCatalog |
 	oldCatalog := catalog copy.
@@ -114,7 +114,7 @@ test16CanModifyPriceOfAnItemThatIsAlreadyInTheCatalog
 	self assert: oldCatalog equals: catalog.
 	! !
 
-!XXXTest methodsFor: 'as yet unclassified' stamp: 'TVC 6/20/2017 12:32:37'!
+!XXXTest methodsFor: 'testing' stamp: 'TVC 6/20/2017 12:32:37'!
 test17CannotModifyCatalogWhenAccessingItsItemsAndPrices
 	| catalogItemsAndPrices oldCatalog |
 	oldCatalog := catalog copy.
@@ -123,7 +123,7 @@ test17CannotModifyCatalogWhenAccessingItsItemsAndPrices
 	self assert: oldCatalog equals: catalog.
 	! !
 
-!XXXTest methodsFor: 'as yet unclassified' stamp: 'TVC 6/20/2017 12:42:26'!
+!XXXTest methodsFor: 'testing' stamp: 'TVC 6/20/2017 12:42:26'!
 test18CannotModifyPriceOfAnItemThatDoesNotBelongToTheCatalog
 	| oldCatalog |
 	oldCatalog := catalog copy.
@@ -133,9 +133,52 @@ test18CannotModifyPriceOfAnItemThatDoesNotBelongToTheCatalog
 		].
 	! !
 
+!XXXTest methodsFor: 'testing' stamp: 'TVC 6/20/2017 18:30:46'!
+test19CannotCheckoutACartWithAnExpiredCreditCard
+	cart add: donQuijote.
+	self should: [cashier checkout: cart payingWith: anExpiredCreditCard on: today] raise: Error - MessageNotUnderstood withExceptionDo: [:anError |
+		self assert: anError messageText equals: cashier class errorMessageWhenMakingACheckoutWithAnExpiredCreditCard.
+		self assert: cashier sales size equals: 0.
+		].
+	! !
 
-!XXXTest methodsFor: 'setUp' stamp: 'TVC 6/18/2017 19:08:35'!
+!XXXTest methodsFor: 'testing' stamp: 'TVC 6/20/2017 17:38:29'!
+test20DoingACorrectCheckoutCreatesASale
+	| ticket |
+	
+	cart add: donQuijote.
+	cart add: madameBovary.
+	ticket := cashier checkout: cart payingWith: aValidCreditCard on: today.
+	
+	self assert: cashier sales size equals: 1.
+	! !
+
+!XXXTest methodsFor: 'testing' stamp: 'TVC 6/20/2017 18:29:57'!
+test21CannotCheckoutACartNextMonthWithAValidCreditCardTodayButThatExpiresTomorrowXXXXXXXXXXXXFIXME
+	| firstOfNextMonth |
+	
+	firstOfNextMonth := today.
+
+	cart add: donQuijote.
+	cart add: madameBovary.
+	self should: [ cashier checkout: cart payingWith: anExpiredCreditCard on: firstOfNextMonth] raise: Error - MessageNotUnderstood withExceptionDo: [:anError |
+		self assert: anError messageText equals: cashier class errorMessageWhenMakingACheckoutWithAnExpiredCreditCard.
+		].
+	! !
+
+
+!XXXTest methodsFor: 'setUp' stamp: 'TVC 6/20/2017 18:18:56'!
 setUp
+	| tomorrow yesterday |
+	"thisMonth := GregorianMonthOfYear current.
+	nextMonth := thisMonth nextMonth: thisMonth.
+	lastMonth := thisMonth previousMonth: thisMonth."
+	
+	today := Date today.
+	tomorrow := Date tomorrow.
+	yesterday := Date yesterday.
+	
+		
 	donQuijote := 'Don Quijote'.
 	donQuijotePrice := 10.
 	madameBovary := 'Madame Bovary'.
@@ -145,8 +188,12 @@ setUp
 	catalog := Catalog newXXX.
 	catalog addItem: donQuijote withPrice: donQuijotePrice.
 	catalog addItem: madameBovary withPrice: madameBovaryPrice.
+	salesBook := OrderedCollection new.
+	
 	cart := Cart newWithCatalog: catalog.
-	cashier := Cashier newWithCatalog: catalog.
+	cashier := Cashier newWithCatalog: catalog andSalesBook: salesBook.
+	aValidCreditCard := CreditCard newFor: '123456' andExpires: tomorrow.
+	anExpiredCreditCard := CreditCard newFor: '234567' andExpires: yesterday.
 ! !
 
 
@@ -222,28 +269,49 @@ errorMessageForFractionalAmountOfOccurrencesForAnItem
 
 !classDefinition: #Cashier category: #'TusLibros-Solution'!
 Object subclass: #Cashier
-	instanceVariableNames: 'catalog'
+	instanceVariableNames: 'catalog salesBook date'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TusLibros-Solution'!
 
-!Cashier methodsFor: 'initialization' stamp: 'TVC 6/18/2017 19:15:02'!
-checkThatCartIsNotEmpty: aCart
-	aCart isEmpty ifTrue: [self error: self class errorMessageForEmptyCartCheckout].! !
+!Cashier methodsFor: 'initialization' stamp: 'TVC 6/20/2017 17:05:49'!
+initializeWithCatalog: aCatalog andSalesBook: aSalesBook
+	catalog := aCatalog .
+	salesBook := aSalesBook ! !
 
-!Cashier methodsFor: 'initialization' stamp: 'TVC 6/18/2017 19:14:41'!
-checkout: aCart
+
+
+!Cashier methodsFor: 'checkout' stamp: 'TVC 6/20/2017 17:47:57'!
+checkThatCartIsNotEmpty: aCart 
+	aCart isEmpty ifTrue: [self error: self class errorMessageForEmptyCartCheckout ].! !
+
+!Cashier methodsFor: 'checkout' stamp: 'TVC 6/20/2017 17:41:27'!
+checkThatCreditCardIsValid: aCreditCard on: aDate
+	(aCreditCard isExpiredOn: aDate ) ifTrue: [self error: self class errorMessageWhenMakingACheckoutWithAnExpiredCreditCard ].! !
+
+!Cashier methodsFor: 'checkout' stamp: 'TVC 6/20/2017 17:42:35'!
+checkout: aCart payingWith: aCreditCard on: aDate
 	| totalCost |
 	
 	self checkThatCartIsNotEmpty: aCart.
+	self checkThatCreditCardIsValid: aCreditCard on: aDate.
 	
 	totalCost := 0.
 	aCart items do: [:anItem | totalCost := totalCost + (catalog priceFor: anItem)].
+	
+	self writeInSalesBookASaleForCart: aCart.
+	
 	^ totalCost.! !
 
-!Cashier methodsFor: 'initialization' stamp: 'TVC 6/18/2017 18:24:43'!
-initializeWithCatalog: aCatalog
-	catalog := aCatalog! !
+
+!Cashier methodsFor: 'accessing' stamp: 'TVC 6/20/2017 17:03:10'!
+sales
+	^ salesBook! !
+
+
+!Cashier methodsFor: 'as yet unclassified' stamp: 'TVC 6/20/2017 18:36:16'!
+writeInSalesBookASaleForCart: aCart 
+	salesBook add: (Sale forProducts: aCart items andCatalog: catalog).! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -251,14 +319,19 @@ initializeWithCatalog: aCatalog
 Cashier class
 	instanceVariableNames: ''!
 
-!Cashier class methodsFor: 'instance creation' stamp: 'TVC 6/18/2017 18:51:40'!
-newWithCatalog: aCatalog
-	^ self new initializeWithCatalog: aCatalog! !
-
 
 !Cashier class methodsFor: 'error messages' stamp: 'TVC 6/18/2017 19:13:10'!
 errorMessageForEmptyCartCheckout
 	^ 'Cannot checkout an empty cart'! !
+
+!Cashier class methodsFor: 'error messages' stamp: 'TVC 6/20/2017 16:22:44'!
+errorMessageWhenMakingACheckoutWithAnExpiredCreditCard
+	^ 'Cannot checkout with an expired credit card'! !
+
+
+!Cashier class methodsFor: 'initialization' stamp: 'TVC 6/20/2017 17:40:10'!
+newWithCatalog: aCatalog andSalesBook: aSalesBook 
+	^ self new initializeWithCatalog: aCatalog andSalesBook: aSalesBook! !
 
 
 !classDefinition: #Catalog category: #'TusLibros-Solution'!
@@ -363,3 +436,54 @@ errorMessageWhenModifyingAnItemThatDoesNotBelongToTheCatalog
 !Catalog class methodsFor: 'initialization' stamp: 'TVC 6/20/2017 12:05:49'!
 newWithItemsAndPrices: someItemsAndPrices 
 	^ self new initializeWithItemsAndPrices: someItemsAndPrices! !
+
+
+!classDefinition: #CreditCard category: #'TusLibros-Solution'!
+Object subclass: #CreditCard
+	instanceVariableNames: 'creditCardNumber expirationDate'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'TusLibros-Solution'!
+
+!CreditCard methodsFor: 'testing' stamp: 'TVC 6/20/2017 17:23:44'!
+isExpiredOn: aDate
+	^ expirationDate < aDate.! !
+
+
+!CreditCard methodsFor: 'initialization' stamp: 'TVC 6/20/2017 16:34:46'!
+initializeWith: aCreditCardNumber andExpirationDate: anExpirationDate
+	creditCardNumber := aCreditCardNumber.
+	expirationDate := anExpirationDate.! !
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'CreditCard class' category: #'TusLibros-Solution'!
+CreditCard class
+	instanceVariableNames: ''!
+
+!CreditCard class methodsFor: 'initialization' stamp: 'TVC 6/20/2017 16:35:11'!
+newFor: aCreditCardNumber andExpires: anExpirationDate
+	^ self new initializeWith: aCreditCardNumber andExpirationDate: anExpirationDate.! !
+
+
+!classDefinition: #Sale category: #'TusLibros-Solution'!
+Object subclass: #Sale
+	instanceVariableNames: 'products catalog'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'TusLibros-Solution'!
+
+!Sale methodsFor: 'initialization' stamp: 'TVC 6/20/2017 18:36:47'!
+initializeForProducts: someProducts andCatalog: aCatalog 
+	products := someProducts.
+	catalog := aCatalog .! !
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'Sale class' category: #'TusLibros-Solution'!
+Sale class
+	instanceVariableNames: ''!
+
+!Sale class methodsFor: 'initialization' stamp: 'TVC 6/20/2017 18:36:01'!
+forProducts: someProducts andCatalog: aCatalog 
+	^ self new initializeForProducts: someProducts andCatalog: aCatalog.! !
