@@ -1,6 +1,6 @@
 !classDefinition: #XXXTest category: #'TusLibros-Solution'!
 TestCase subclass: #XXXTest
-	instanceVariableNames: 'cart catalog cashier donQuijotePrice donQuijote itemThatDoesNotBelongToEditorial madameBovary madameBovaryPrice anExpiredCreditCard aValidCreditCard salesBook thisMonth today'
+	instanceVariableNames: 'cart catalog cashier donQuijotePrice donQuijote itemThatDoesNotBelongToEditorial madameBovary madameBovaryPrice anExpiredCreditCard aValidCreditCard salesBook thisMonth today nextMonth lastMonth customer aStolenCreditCard anotherCustomer merchantProcessorClientStub errorMerchantProcessorClientStub'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TusLibros-Solution'!
@@ -32,12 +32,12 @@ test05CannotAddAnItemThatDoesNotBelongToTheEditorial
 		self assert: cart size equals: 0.
 	].! !
 
-!XXXTest methodsFor: 'testing' stamp: 'TVC 6/20/2017 17:43:01'!
+!XXXTest methodsFor: 'testing' stamp: 'TVC 6/25/2017 20:28:20'!
 test06DoingCheckoutOfACartWithASingleItemAndAValidCreditCardWorks
 	| ticket |
 	
 	cart add: donQuijote.
-	ticket := cashier checkout: cart payingWith: aValidCreditCard on: today.
+	ticket := cashier checkout: cart payingWith: aValidCreditCard on: today through: merchantProcessorClientStub.
 	self assert: ticket equals: donQuijotePrice.! !
 
 !XXXTest methodsFor: 'testing' stamp: 'TVC 6/20/2017 12:38:32'!
@@ -50,19 +50,20 @@ test07CannotModifyCartWhenAccessingItsItems
 	cartItems remove: donQuijote.
 	self assert: oldCart equals: cart.! !
 
-!XXXTest methodsFor: 'testing' stamp: 'TVC 6/20/2017 17:43:34'!
+!XXXTest methodsFor: 'testing' stamp: 'TVC 6/25/2017 20:28:24'!
 test08DoingCheckoutOfACartWithMultipleItemsAndWithAValidCreditCardWorks
 	| ticket |
 	
 	cart add: donQuijote.
 	cart add: madameBovary.
-	ticket := cashier checkout: cart payingWith: aValidCreditCard on: today.
+	ticket := cashier checkout: cart payingWith: aValidCreditCard on: today through: merchantProcessorClientStub.
 	self assert: ticket equals: donQuijotePrice + madameBovaryPrice.! !
 
-!XXXTest methodsFor: 'testing' stamp: 'TVC 6/20/2017 17:45:51'!
+!XXXTest methodsFor: 'testing' stamp: 'TVC 6/25/2017 20:28:31'!
 test09DoingCheckoutWithAnEmptyCartRaisesAnError
-	self should: [cashier checkout: cart payingWith: aValidCreditCard on: today] raise: Error - MessageNotUnderstood withExceptionDo: [:anError | 
+	self should: [cashier checkout: cart payingWith: aValidCreditCard on: today through: merchantProcessorClientStub] raise: Error - MessageNotUnderstood withExceptionDo: [:anError | 
 		self assert: anError messageText equals: cashier class errorMessageForEmptyCartCheckout. 
+		self assert: salesBook amountOfSales equals: 0.
 		].! !
 
 !XXXTest methodsFor: 'testing' stamp: 'TVC 6/18/2017 19:33:44'!
@@ -133,52 +134,98 @@ test18CannotModifyPriceOfAnItemThatDoesNotBelongToTheCatalog
 		].
 	! !
 
-!XXXTest methodsFor: 'testing' stamp: 'TVC 6/20/2017 18:30:46'!
+!XXXTest methodsFor: 'testing' stamp: 'TVC 6/25/2017 20:28:37'!
 test19CannotCheckoutACartWithAnExpiredCreditCard
 	cart add: donQuijote.
-	self should: [cashier checkout: cart payingWith: anExpiredCreditCard on: today] raise: Error - MessageNotUnderstood withExceptionDo: [:anError |
+	self should: [cashier checkout: cart payingWith: anExpiredCreditCard on: today through: merchantProcessorClientStub] raise: Error - MessageNotUnderstood withExceptionDo: [:anError |
 		self assert: anError messageText equals: cashier class errorMessageWhenMakingACheckoutWithAnExpiredCreditCard.
-		self assert: cashier sales size equals: 0.
+		self assert: salesBook amountOfSales equals: 0.
 		].
 	! !
 
-!XXXTest methodsFor: 'testing' stamp: 'TVC 6/20/2017 17:38:29'!
+!XXXTest methodsFor: 'testing' stamp: 'TVC 6/25/2017 20:28:43'!
 test20DoingACorrectCheckoutCreatesASale
-	| ticket |
-	
 	cart add: donQuijote.
 	cart add: madameBovary.
-	ticket := cashier checkout: cart payingWith: aValidCreditCard on: today.
+	cashier checkout: cart payingWith: aValidCreditCard on: today through: merchantProcessorClientStub.
 	
-	self assert: cashier sales size equals: 1.
+	self assert: salesBook amountOfSales equals: 1.
 	! !
 
-!XXXTest methodsFor: 'testing' stamp: 'TVC 6/20/2017 18:29:57'!
-test21CannotCheckoutACartNextMonthWithAValidCreditCardTodayButThatExpiresTomorrowXXXXXXXXXXXXFIXME
-	| firstOfNextMonth |
-	
-	firstOfNextMonth := today.
+!XXXTest methodsFor: 'testing' stamp: 'TVC 6/25/2017 20:28:55'!
+test21CannotCheckoutACartInTwoMonthsFromNowWithAValidCreditCardTodayButThatExpiresNextMonth
+	| twoMonthsFromNow twoMonthsFromNowDate |
+	twoMonthsFromNow := GregorianMonthOfYear current next next.
+	twoMonthsFromNowDate := Date year: twoMonthsFromNow year number month: twoMonthsFromNow month number day: 1 .
 
 	cart add: donQuijote.
 	cart add: madameBovary.
-	self should: [ cashier checkout: cart payingWith: anExpiredCreditCard on: firstOfNextMonth] raise: Error - MessageNotUnderstood withExceptionDo: [:anError |
+	self should: [ cashier checkout: cart payingWith: aValidCreditCard on: twoMonthsFromNowDate through: merchantProcessorClientStub] raise: Error - MessageNotUnderstood withExceptionDo: [:anError |
 		self assert: anError messageText equals: cashier class errorMessageWhenMakingACheckoutWithAnExpiredCreditCard.
+		self assert: salesBook amountOfSales equals: 0.
 		].
 	! !
 
+!XXXTest methodsFor: 'testing' stamp: 'TVC 6/25/2017 20:29:00'!
+test22CheckoutCreatesASaleThatIsRelatedToTheCashiersCustomerAndTheCreditCardAndDateUsedInTheTransaction
+	cart add: donQuijote.
+	cashier checkout: cart payingWith: aValidCreditCard on: today through: merchantProcessorClientStub.
+	self shouldnt: [salesBook detect: [:aSale | aSale wasMadeBy: customer payingWith: aValidCreditCard on: today]] raise: Error description: 'Object is not in the collection.'.
+	! !
 
-!XXXTest methodsFor: 'setUp' stamp: 'TVC 6/20/2017 18:18:56'!
+!XXXTest methodsFor: 'testing' stamp: 'TVC 6/25/2017 20:29:04'!
+test23WhenModifyingTheCatalogASaleHasBeenCreatedWithTheSaleCatalogIsNotModified
+	| aSale oldCatalog |
+	cart add: donQuijote.
+	cashier checkout: cart payingWith: aValidCreditCard on: today through: merchantProcessorClientStub.
+	aSale := salesBook first.
+	oldCatalog := catalog copy.
+	catalog addItem: itemThatDoesNotBelongToEditorial withPrice: 20.
+	self assert: aSale catalog equals: oldCatalog.! !
+
+!XXXTest methodsFor: 'testing' stamp: 'TVC 6/25/2017 20:29:08'!
+test24SalesBookCanListPurchasesForACustomer
+	| purchases |
+	cart add: donQuijote.
+	cashier checkout: cart payingWith: aValidCreditCard on: today through: merchantProcessorClientStub.
+	purchases := salesBook listPurchasesFor: customer.
+	self assert: purchases size equals: 1.
+	self assert: purchases first equals: (Sale forProducts: cart items andCatalog: catalog andCustomer: customer payingWith: aValidCreditCard on: today).! !
+
+!XXXTest methodsFor: 'testing' stamp: 'TVC 6/25/2017 20:29:12'!
+test25CannotCheckoutIfTheCreditCardHasBeenStolen
+	cart add: donQuijote.
+	self should: [cashier checkout: cart payingWith: aStolenCreditCard on: today through: merchantProcessorClientStub] raise: Error - MessageNotUnderstood withExceptionDo: [:anError | 
+		self assert: anError messageText equals: cashier class errorMessageForCheckoutWithStolenCreditCard.
+		self assert: salesBook amountOfSales equals: 0.
+		]! !
+
+!XXXTest methodsFor: 'testing' stamp: 'TVC 6/25/2017 20:08:05'!
+test26ACorrectDebitFromCardsThroughTheMerchantProcessorRespondsASuccessMessage
+	self assert: (merchantProcessorClientStub debitFrom: aValidCreditCard forTransactionAmount: 100) equals: merchantProcessorClientStub class genericSuccessMessage.! !
+
+!XXXTest methodsFor: 'testing' stamp: 'TVC 6/25/2017 20:17:07'!
+test27AnIncorrectDebitFromCreditCardThroughTheMerchantProcessorRaisesAnError
+	self should: [errorMerchantProcessorClientStub debitFrom: aValidCreditCard forTransactionAmount: 100] raise: Error - MessageNotUnderstood withExceptionDo: [:anError | 
+			self assert: anError messageText equals: errorMerchantProcessorClientStub class genericErrorDescription
+			].! !
+
+!XXXTest methodsFor: 'testing' stamp: 'TVC 6/25/2017 20:29:27'!
+test28DoingACheckoutWithAMerchantProcessorThatRaisesAnErrorDoesNotCompleteTheCheckout
+	cart add: donQuijote.
+	self should: [cashier checkout: cart payingWith: aValidCreditCard on: today through: errorMerchantProcessorClientStub] raise: Error - MessageNotUnderstood withExceptionDo: [:anError | 
+		self assert: anError messageText equals: (cashier class errorMessageWhenDebitCouldNotBeProcessed: errorMerchantProcessorClientStub class genericErrorDescription). 
+		self assert: salesBook amountOfSales equals: 0.
+		].! !
+
+
+!XXXTest methodsFor: 'setUp' stamp: 'TVC 6/25/2017 20:19:56'!
 setUp
-	| tomorrow yesterday |
-	"thisMonth := GregorianMonthOfYear current.
-	nextMonth := thisMonth nextMonth: thisMonth.
-	lastMonth := thisMonth previousMonth: thisMonth."
-	
 	today := Date today.
-	tomorrow := Date tomorrow.
-	yesterday := Date yesterday.
+	thisMonth := GregorianMonthOfYear current.
+	nextMonth := thisMonth next.
+	lastMonth := thisMonth previous.
 	
-		
 	donQuijote := 'Don Quijote'.
 	donQuijotePrice := 10.
 	madameBovary := 'Madame Bovary'.
@@ -188,12 +235,18 @@ setUp
 	catalog := Catalog newXXX.
 	catalog addItem: donQuijote withPrice: donQuijotePrice.
 	catalog addItem: madameBovary withPrice: madameBovaryPrice.
-	salesBook := OrderedCollection new.
+	salesBook := SalesBook newXXX.
 	
 	cart := Cart newWithCatalog: catalog.
-	cashier := Cashier newWithCatalog: catalog andSalesBook: salesBook.
-	aValidCreditCard := CreditCard newFor: '123456' andExpires: tomorrow.
-	anExpiredCreditCard := CreditCard newFor: '234567' andExpires: yesterday.
+	customer := 'Pepe'.	
+	anotherCustomer := 'Madre Teresa'.
+	cashier := Cashier withCatalog: catalog andSalesBook: salesBook forCustomer: customer.
+	aValidCreditCard := CreditCard newFor: '123456' andExpires: nextMonth forOwner: customer.
+	anExpiredCreditCard := CreditCard newFor: '234567' andExpires: lastMonth forOwner: customer.
+	aStolenCreditCard := CreditCard newFor: '345678' andExpires: nextMonth forOwner: anotherCustomer.
+	
+	merchantProcessorClientStub := MerchantProcessorClientStub newWithStubbedResponse: [MerchantProcessorClientStub genericSuccessMessage].
+	errorMerchantProcessorClientStub := MerchantProcessorClientStub newWithStubbedResponse: [self error: MerchantProcessorClientStub genericErrorDescription]
 ! !
 
 
@@ -269,28 +322,39 @@ errorMessageForFractionalAmountOfOccurrencesForAnItem
 
 !classDefinition: #Cashier category: #'TusLibros-Solution'!
 Object subclass: #Cashier
-	instanceVariableNames: 'catalog salesBook date'
+	instanceVariableNames: 'catalog salesBook date customer'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TusLibros-Solution'!
 
-!Cashier methodsFor: 'initialization' stamp: 'TVC 6/20/2017 17:05:49'!
-initializeWithCatalog: aCatalog andSalesBook: aSalesBook
+!Cashier methodsFor: 'initialization' stamp: 'TVC 6/25/2017 16:27:06'!
+initializeWithCatalog: aCatalog andSalesBook: aSalesBook forCustomer: aCustomer
 	catalog := aCatalog .
-	salesBook := aSalesBook ! !
-
+	salesBook := aSalesBook.
+	customer := aCustomer.! !
 
 
 !Cashier methodsFor: 'checkout' stamp: 'TVC 6/20/2017 17:47:57'!
 checkThatCartIsNotEmpty: aCart 
 	aCart isEmpty ifTrue: [self error: self class errorMessageForEmptyCartCheckout ].! !
 
-!Cashier methodsFor: 'checkout' stamp: 'TVC 6/20/2017 17:41:27'!
-checkThatCreditCardIsValid: aCreditCard on: aDate
-	(aCreditCard isExpiredOn: aDate ) ifTrue: [self error: self class errorMessageWhenMakingACheckoutWithAnExpiredCreditCard ].! !
+!Cashier methodsFor: 'checkout' stamp: 'TVC 6/25/2017 19:16:05'!
+checkThatCreditCard: aCreditCard IsNotExpiredOn: aDate
+	| monthAndYearDate |
+	monthAndYearDate := GregorianMonthOfYear yearNumber: aDate year yearNumber monthNumber: aDate month monthIndex.
+	(aCreditCard isExpiredOn: monthAndYearDate ) ifTrue: [self error: self class errorMessageWhenMakingACheckoutWithAnExpiredCreditCard ].! !
 
-!Cashier methodsFor: 'checkout' stamp: 'TVC 6/20/2017 17:42:35'!
-checkout: aCart payingWith: aCreditCard on: aDate
+!Cashier methodsFor: 'checkout' stamp: 'TVC 6/25/2017 19:18:15'!
+checkThatCreditCardIsNotStolen: aCreditCard
+	(aCreditCard isOwnedBy: customer) ifFalse: [self error: self class errorMessageForCheckoutWithStolenCreditCard].! !
+
+!Cashier methodsFor: 'checkout' stamp: 'TVC 6/25/2017 19:17:20'!
+checkThatCreditCardIsValid: aCreditCard on: aDate
+	self checkThatCreditCard: aCreditCard IsNotExpiredOn: aDate.
+	self checkThatCreditCardIsNotStolen: aCreditCard.! !
+
+!Cashier methodsFor: 'checkout' stamp: 'TVC 6/25/2017 20:31:49'!
+checkout: aCart payingWith: aCreditCard on: aDate through: aMerchantProcessorClient
 	| totalCost |
 	
 	self checkThatCartIsNotEmpty: aCart.
@@ -298,20 +362,20 @@ checkout: aCart payingWith: aCreditCard on: aDate
 	
 	totalCost := 0.
 	aCart items do: [:anItem | totalCost := totalCost + (catalog priceFor: anItem)].
+
+	[aMerchantProcessorClient debitFrom: aCreditCard forTransactionAmount: totalCost.]
+		on: Error
+		do: [:anError | self error: (self class errorMessageWhenDebitCouldNotBeProcessed: anError messageText)].
 	
-	self writeInSalesBookASaleForCart: aCart.
+	self writeInSalesBookASaleForCart: aCart payingWith: aCreditCard on: aDate.
 	
 	^ totalCost.! !
 
 
-!Cashier methodsFor: 'accessing' stamp: 'TVC 6/20/2017 17:03:10'!
-sales
-	^ salesBook! !
 
-
-!Cashier methodsFor: 'as yet unclassified' stamp: 'TVC 6/20/2017 18:36:16'!
-writeInSalesBookASaleForCart: aCart 
-	salesBook add: (Sale forProducts: aCart items andCatalog: catalog).! !
+!Cashier methodsFor: 'as yet unclassified' stamp: 'TVC 6/25/2017 16:55:58'!
+writeInSalesBookASaleForCart: aCart payingWith: aCreditCard on: aDate
+	salesBook add: (Sale forProducts: aCart items andCatalog: catalog andCustomer: customer payingWith: aCreditCard on: aDate).! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -319,19 +383,26 @@ writeInSalesBookASaleForCart: aCart
 Cashier class
 	instanceVariableNames: ''!
 
+!Cashier class methodsFor: 'error messages' stamp: 'TVC 6/25/2017 19:07:23'!
+errorMessageForCheckoutWithStolenCreditCard
+	^ 'Cannot checkout with a stolen credit card'! !
 
 !Cashier class methodsFor: 'error messages' stamp: 'TVC 6/18/2017 19:13:10'!
 errorMessageForEmptyCartCheckout
 	^ 'Cannot checkout an empty cart'! !
+
+!Cashier class methodsFor: 'error messages' stamp: 'TVC 6/25/2017 20:25:32'!
+errorMessageWhenDebitCouldNotBeProcessed: aMerchantProcessorDebitErrorDescription
+	^ 'Cannot checkout because debit could not be processed at the moment. Detailed error: ' , aMerchantProcessorDebitErrorDescription! !
 
 !Cashier class methodsFor: 'error messages' stamp: 'TVC 6/20/2017 16:22:44'!
 errorMessageWhenMakingACheckoutWithAnExpiredCreditCard
 	^ 'Cannot checkout with an expired credit card'! !
 
 
-!Cashier class methodsFor: 'initialization' stamp: 'TVC 6/20/2017 17:40:10'!
-newWithCatalog: aCatalog andSalesBook: aSalesBook 
-	^ self new initializeWithCatalog: aCatalog andSalesBook: aSalesBook! !
+!Cashier class methodsFor: 'initialization' stamp: 'TVC 6/25/2017 16:32:05'!
+withCatalog: aCatalog andSalesBook: aSalesBook forCustomer: aCustomer
+	^ self new initializeWithCatalog: aCatalog andSalesBook: aSalesBook forCustomer: aCustomer! !
 
 
 !classDefinition: #Catalog category: #'TusLibros-Solution'!
@@ -440,20 +511,49 @@ newWithItemsAndPrices: someItemsAndPrices
 
 !classDefinition: #CreditCard category: #'TusLibros-Solution'!
 Object subclass: #CreditCard
-	instanceVariableNames: 'creditCardNumber expirationDate'
+	instanceVariableNames: 'creditCardNumber expirationDate owner'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TusLibros-Solution'!
 
-!CreditCard methodsFor: 'testing' stamp: 'TVC 6/20/2017 17:23:44'!
+!CreditCard methodsFor: 'testing' stamp: 'TVC 6/25/2017 15:49:39'!
 isExpiredOn: aDate
 	^ expirationDate < aDate.! !
 
+!CreditCard methodsFor: 'testing' stamp: 'TVC 6/25/2017 19:31:30'!
+isOwnedBy: anOwner
+	^ owner = anOwner ! !
 
-!CreditCard methodsFor: 'initialization' stamp: 'TVC 6/20/2017 16:34:46'!
-initializeWith: aCreditCardNumber andExpirationDate: anExpirationDate
+
+!CreditCard methodsFor: 'initialization' stamp: 'TVC 6/25/2017 19:30:04'!
+initializeWith: aCreditCardNumber andExpirationDate: anExpirationDate forOwner: anOwner
 	creditCardNumber := aCreditCardNumber.
-	expirationDate := anExpirationDate.! !
+	expirationDate := anExpirationDate.
+	owner := anOwner.! !
+
+
+!CreditCard methodsFor: 'comparing' stamp: 'TVC 6/25/2017 19:31:15'!
+= anObject
+	^ (anObject isKindOf: self class) and: [creditCardNumber = anObject creditCardNumber and: [expirationDate = anObject expirationDate and: [owner = anObject owner]]].
+	! !
+
+
+!CreditCard methodsFor: 'accessing' stamp: 'TVC 6/25/2017 18:26:32'!
+creditCardNumber
+	^ creditCardNumber! !
+
+!CreditCard methodsFor: 'accessing' stamp: 'TVC 6/25/2017 18:26:58'!
+expirationDate
+	^ expirationDate ! !
+
+!CreditCard methodsFor: 'accessing' stamp: 'TVC 6/25/2017 19:31:02'!
+owner
+	^ owner! !
+
+
+!CreditCard methodsFor: 'copying' stamp: 'TVC 6/25/2017 19:29:21'!
+copy
+	^ self class newFor: creditCardNumber andExpires: expirationDate forOwner: owner.! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -461,22 +561,96 @@ initializeWith: aCreditCardNumber andExpirationDate: anExpirationDate
 CreditCard class
 	instanceVariableNames: ''!
 
-!CreditCard class methodsFor: 'initialization' stamp: 'TVC 6/20/2017 16:35:11'!
-newFor: aCreditCardNumber andExpires: anExpirationDate
-	^ self new initializeWith: aCreditCardNumber andExpirationDate: anExpirationDate.! !
+!CreditCard class methodsFor: 'initialization' stamp: 'TVC 6/25/2017 19:29:03'!
+newFor: aCreditCardNumber andExpires: anExpirationDate forOwner: anOwner
+	^ self new initializeWith: aCreditCardNumber andExpirationDate: anExpirationDate forOwner: anOwner.! !
 
 
-!classDefinition: #Sale category: #'TusLibros-Solution'!
-Object subclass: #Sale
-	instanceVariableNames: 'products catalog'
+!classDefinition: #MerchantProcessorClientStub category: #'TusLibros-Solution'!
+Object subclass: #MerchantProcessorClientStub
+	instanceVariableNames: 'stubbedResponse'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TusLibros-Solution'!
 
-!Sale methodsFor: 'initialization' stamp: 'TVC 6/20/2017 18:36:47'!
-initializeForProducts: someProducts andCatalog: aCatalog 
+!MerchantProcessorClientStub methodsFor: 'as yet unclassified' stamp: 'TVC 6/25/2017 20:07:30'!
+debitFrom: aValidCreditCard forTransactionAmount: aTransactionAmount
+	^ stubbedResponse value! !
+
+!MerchantProcessorClientStub methodsFor: 'as yet unclassified' stamp: 'TVC 6/25/2017 20:07:18'!
+initializeWithStubbedResponse: aBlockClosure
+	stubbedResponse := aBlockClosure.! !
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'MerchantProcessorClientStub class' category: #'TusLibros-Solution'!
+MerchantProcessorClientStub class
+	instanceVariableNames: ''!
+
+!MerchantProcessorClientStub class methodsFor: 'messages' stamp: 'TVC 6/25/2017 20:18:51'!
+genericErrorDescription
+	^ 'Error description'! !
+
+!MerchantProcessorClientStub class methodsFor: 'messages' stamp: 'TVC 6/25/2017 20:18:58'!
+genericSuccessMessage
+	^ 'OK'! !
+
+
+!MerchantProcessorClientStub class methodsFor: 'instance creation' stamp: 'TVC 6/25/2017 20:06:40'!
+newWithStubbedResponse: aBlockClosure
+	^ self new initializeWithStubbedResponse: aBlockClosure! !
+
+
+!classDefinition: #Sale category: #'TusLibros-Solution'!
+Object subclass: #Sale
+	instanceVariableNames: 'products catalog customer creditCard date'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'TusLibros-Solution'!
+
+!Sale methodsFor: 'initialization' stamp: 'TVC 6/25/2017 16:54:54'!
+initializeForProducts: someProducts andCatalog: aCatalog andCustomer: aCustomer payingWith: aCreditCard on: aDate
 	products := someProducts.
-	catalog := aCatalog .! !
+	catalog := aCatalog copy.
+	customer := aCustomer.
+	creditCard := aCreditCard.
+	date := aDate.! !
+
+
+!Sale methodsFor: 'testing' stamp: 'TVC 6/25/2017 18:46:29'!
+wasMadeBy: aCustomer
+	^ customer = aCustomer! !
+
+!Sale methodsFor: 'testing' stamp: 'TVC 6/25/2017 16:53:37'!
+wasMadeBy: aCustomer payingWith: aCreditCard on: aDate
+	^ customer = aCustomer and: [creditCard = aCreditCard and: [date = aDate]]! !
+
+
+!Sale methodsFor: 'accessing' stamp: 'TVC 6/25/2017 16:49:02'!
+catalog
+	^ catalog copy.! !
+
+!Sale methodsFor: 'accessing' stamp: 'TVC 6/25/2017 18:52:04'!
+creditCard
+	^ creditCard copy! !
+
+!Sale methodsFor: 'accessing' stamp: 'TVC 6/25/2017 18:51:42'!
+customer
+	^ customer! !
+
+!Sale methodsFor: 'accessing' stamp: 'TVC 6/25/2017 18:51:23'!
+date
+	^ date! !
+
+!Sale methodsFor: 'accessing' stamp: 'TVC 6/25/2017 18:51:09'!
+products
+	^ products copy! !
+
+
+!Sale methodsFor: 'comparing' stamp: 'TVC 6/25/2017 18:50:35'!
+= anObject
+	^ (anObject isKindOf: self class) and: [customer = anObject customer and: [creditCard = anObject creditCard and: [catalog = anObject catalog and: [date = anObject date and: [products = anObject products]]]]].
+	! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -484,6 +658,56 @@ initializeForProducts: someProducts andCatalog: aCatalog
 Sale class
 	instanceVariableNames: ''!
 
-!Sale class methodsFor: 'initialization' stamp: 'TVC 6/20/2017 18:36:01'!
-forProducts: someProducts andCatalog: aCatalog 
-	^ self new initializeForProducts: someProducts andCatalog: aCatalog.! !
+!Sale class methodsFor: 'initialization' stamp: 'TVC 6/25/2017 16:55:10'!
+forProducts: someProducts andCatalog: aCatalog andCustomer: aCustomer payingWith: aCreditCard on: aDate
+	^ self new initializeForProducts: someProducts andCatalog: aCatalog andCustomer: aCustomer payingWith: aCreditCard on: aDate.! !
+
+
+!classDefinition: #SalesBook category: #'TusLibros-Solution'!
+Object subclass: #SalesBook
+	instanceVariableNames: 'sales'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'TusLibros-Solution'!
+
+!SalesBook methodsFor: 'initialization' stamp: 'TVC 6/25/2017 18:06:23'!
+initialize
+	sales := OrderedCollection new.! !
+
+
+!SalesBook methodsFor: 'adding' stamp: 'TVC 6/25/2017 18:08:37'!
+add: aSale 
+	sales add: aSale! !
+
+
+!SalesBook methodsFor: 'accessing' stamp: 'TVC 6/25/2017 18:09:46'!
+amountOfSales
+	^ sales size! !
+
+!SalesBook methodsFor: 'accessing' stamp: 'TVC 6/25/2017 18:15:38'!
+first
+	^ sales first! !
+
+!SalesBook methodsFor: 'accessing' stamp: 'TVC 6/25/2017 18:46:42'!
+listPurchasesFor: aCustomer 
+	^ sales select: [:aSale | aSale wasMadeBy: aCustomer]! !
+
+
+!SalesBook methodsFor: 'testing' stamp: 'TVC 6/25/2017 18:10:50'!
+isEmpty
+	^ sales isEmpty! !
+
+
+!SalesBook methodsFor: 'as yet unclassified' stamp: 'TVC 6/25/2017 18:12:23'!
+detect: aBlockClosure
+	^ sales detect: aBlockClosure! !
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'SalesBook class' category: #'TusLibros-Solution'!
+SalesBook class
+	instanceVariableNames: ''!
+
+!SalesBook class methodsFor: 'initialization' stamp: 'TVC 6/25/2017 18:05:50'!
+newXXX
+	^ self new initialize! !
