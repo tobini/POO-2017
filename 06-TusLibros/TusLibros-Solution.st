@@ -1,46 +1,46 @@
-!classDefinition: #XXXTest category: #'TusLibros-Solution'!
-TestCase subclass: #XXXTest
+!classDefinition: #TusLibrosTest category: #'TusLibros-Solution'!
+TestCase subclass: #TusLibrosTest
 	instanceVariableNames: 'cart catalog cashier donQuijotePrice donQuijote itemThatDoesNotBelongToEditorial madameBovary madameBovaryPrice anExpiredCreditCard aValidCreditCard salesBook thisMonth today nextMonth lastMonth customer aStolenCreditCard anotherCustomer merchantProcessorClientStub errorMerchantProcessorClientStub testClientId testClientPassword nonExistentClientId nonExistentClientPassword clientRegistry tusLibrosAPI'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TusLibros-Solution'!
 
-!XXXTest methodsFor: 'testing' stamp: 'TVC 6/18/2017 16:31:54'!
+!TusLibrosTest methodsFor: 'testing' stamp: 'TVC 6/18/2017 16:31:54'!
 test01NewCartIsEmpty
 	self assert: cart isEmpty! !
 
-!XXXTest methodsFor: 'testing' stamp: 'TVC 6/18/2017 18:21:43'!
+!TusLibrosTest methodsFor: 'testing' stamp: 'TVC 6/18/2017 18:21:43'!
 test02CartWithAnAddedItemIsNotEmpty
 	cart add: donQuijote.
 	self deny: cart isEmpty! !
 
-!XXXTest methodsFor: 'testing' stamp: 'TVC 6/18/2017 19:34:35'!
+!TusLibrosTest methodsFor: 'testing' stamp: 'TVC 6/18/2017 19:34:35'!
 test03CartWithTwoAddedItemsHasTwoItems
 	cart add: donQuijote.
 	cart add: donQuijote.
 	self assert: cart size equals: 2! !
 
-!XXXTest methodsFor: 'testing' stamp: 'TVC 6/18/2017 19:34:31'!
+!TusLibrosTest methodsFor: 'testing' stamp: 'TVC 6/18/2017 19:34:31'!
 test04CartWithOneAddedItemHasOneItems
 	cart add: donQuijote.
 	self assert: cart size equals: 1! !
 
-!XXXTest methodsFor: 'testing' stamp: 'TVC 6/18/2017 19:34:21'!
+!TusLibrosTest methodsFor: 'testing' stamp: 'TVC 6/18/2017 19:34:21'!
 test05CannotAddAnItemThatDoesNotBelongToTheEditorial
 	self should: [cart add: itemThatDoesNotBelongToEditorial] raise: Error - MessageNotUnderstood withExceptionDo: [:anError | 
 		self assert: anError messageText = cart class errorMessageForCaseItemIsAddedAndItDoesNotBelongToEditorial . 
 		self assert: cart size equals: 0.
 	].! !
 
-!XXXTest methodsFor: 'testing' stamp: 'TVC 6/25/2017 20:28:20'!
+!TusLibrosTest methodsFor: 'testing' stamp: 'GDS 6/27/2017 17:52:09'!
 test06DoingCheckoutOfACartWithASingleItemAndAValidCreditCardWorks
 	| ticket |
 	
 	cart add: donQuijote.
 	ticket := cashier checkout: cart payingWith: aValidCreditCard on: today through: merchantProcessorClientStub.
-	self assert: ticket equals: donQuijotePrice.! !
+	self assert: ticket value equals: donQuijotePrice.! !
 
-!XXXTest methodsFor: 'testing' stamp: 'TVC 6/20/2017 12:38:32'!
+!TusLibrosTest methodsFor: 'testing' stamp: 'TVC 6/20/2017 12:38:32'!
 test07CannotModifyCartWhenAccessingItsItems
 	| oldCart cartItems |
 	
@@ -50,55 +50,55 @@ test07CannotModifyCartWhenAccessingItsItems
 	cartItems remove: donQuijote.
 	self assert: oldCart equals: cart.! !
 
-!XXXTest methodsFor: 'testing' stamp: 'TVC 6/25/2017 20:28:24'!
+!TusLibrosTest methodsFor: 'testing' stamp: 'GDS 6/27/2017 17:52:28'!
 test08DoingCheckoutOfACartWithMultipleItemsAndWithAValidCreditCardWorks
 	| ticket |
 	
 	cart add: donQuijote.
 	cart add: madameBovary.
 	ticket := cashier checkout: cart payingWith: aValidCreditCard on: today through: merchantProcessorClientStub.
-	self assert: ticket equals: donQuijotePrice + madameBovaryPrice.! !
+	self assert: ticket value equals: donQuijotePrice + madameBovaryPrice.! !
 
-!XXXTest methodsFor: 'testing' stamp: 'TVC 6/25/2017 20:28:31'!
+!TusLibrosTest methodsFor: 'testing' stamp: 'TVC 6/25/2017 20:28:31'!
 test09DoingCheckoutWithAnEmptyCartRaisesAnError
 	self should: [cashier checkout: cart payingWith: aValidCreditCard on: today through: merchantProcessorClientStub] raise: Error - MessageNotUnderstood withExceptionDo: [:anError | 
 		self assert: anError messageText equals: cashier class errorMessageForEmptyCartCheckout. 
 		self assert: salesBook amountOfSales equals: 0.
 		].! !
 
-!XXXTest methodsFor: 'testing' stamp: 'TVC 6/18/2017 19:33:44'!
+!TusLibrosTest methodsFor: 'testing' stamp: 'TVC 6/18/2017 19:33:44'!
 test10CanAddAnItemToTheCartWithMoreThanOneOcurrence
 	cart add: donQuijote withOccurrences: 150.
 	self assert: cart size equals: 150.! !
 
-!XXXTest methodsFor: 'testing' stamp: 'TVC 6/18/2017 19:33:34'!
+!TusLibrosTest methodsFor: 'testing' stamp: 'TVC 6/18/2017 19:33:34'!
 test11AddingACartWithNegativeOccurrencesDoesNotAffectTheCartSize
 	cart add: donQuijote.
 	cart add: donQuijote withOccurrences: -30.
 	self assert: cart size equals: 1.! !
 
-!XXXTest methodsFor: 'testing' stamp: 'TVC 6/18/2017 19:32:11'!
+!TusLibrosTest methodsFor: 'testing' stamp: 'TVC 6/18/2017 19:32:11'!
 test12AddingACartWithAFractionalAmountOfOccurrencesRaisesAnError
 	self should: [cart add: donQuijote withOccurrences: 25/32] raise: Error - MessageNotUnderstood withExceptionDo: [:anError | 
 		self assert: anError messageText equals: cart class errorMessageForFractionalAmountOfOccurrencesForAnItem. 
 		self assert: cart size equals: 0.
 		].! !
 
-!XXXTest methodsFor: 'testing' stamp: 'TVC 6/20/2017 11:41:28'!
+!TusLibrosTest methodsFor: 'testing' stamp: 'TVC 6/20/2017 11:41:28'!
 test13CannotAddMultipleTimesAnItemThatDoesNotBelongToTheEditorial
 	self should: [cart add: itemThatDoesNotBelongToEditorial withOccurrences: 5] raise: Error - MessageNotUnderstood withExceptionDo: [:anError | 
 		self assert: anError messageText = cart class errorMessageForCaseItemIsAddedAndItDoesNotBelongToEditorial . 
 		self assert: cart size equals: 0.
 	].! !
 
-!XXXTest methodsFor: 'testing' stamp: 'TVC 6/20/2017 11:46:56'!
+!TusLibrosTest methodsFor: 'testing' stamp: 'TVC 6/20/2017 11:46:56'!
 test14CannotAddAnItemToACatalogWithANegativePrice
 	self should: [catalog addItem: itemThatDoesNotBelongToEditorial withPrice: -50] raise: Error - MessageNotUnderstood withExceptionDo: [:anError | 
 		self assert: anError messageText = catalog class errorMessageWhenAddingAnItemWithNegativeValue . 
 		self deny: (catalog includes: itemThatDoesNotBelongToEditorial).
 	].! !
 
-!XXXTest methodsFor: 'testing' stamp: 'TVC 6/20/2017 11:52:13'!
+!TusLibrosTest methodsFor: 'testing' stamp: 'TVC 6/20/2017 11:52:13'!
 test15CannotAddAnItemThatIsAlreadyInTheList
 	self should: [catalog addItem: donQuijote withPrice: 99] raise: Error - MessageNotUnderstood withExceptionDo: [:anError | 
 		self assert: anError messageText = catalog class errorMessageWhenAddingAnItemThatIsAlreadyInTheCatalog . 
@@ -106,7 +106,7 @@ test15CannotAddAnItemThatIsAlreadyInTheList
 		self assert: (catalog priceFor: donQuijote) equals: donQuijotePrice.
 	].! !
 
-!XXXTest methodsFor: 'testing' stamp: 'TVC 6/20/2017 12:15:23'!
+!TusLibrosTest methodsFor: 'testing' stamp: 'TVC 6/20/2017 12:15:23'!
 test16CanModifyPriceOfAnItemThatIsAlreadyInTheCatalog
 	| oldCatalog newCatalog |
 	oldCatalog := catalog copy.
@@ -115,7 +115,7 @@ test16CanModifyPriceOfAnItemThatIsAlreadyInTheCatalog
 	self assert: oldCatalog equals: catalog.
 	! !
 
-!XXXTest methodsFor: 'testing' stamp: 'TVC 6/20/2017 12:32:37'!
+!TusLibrosTest methodsFor: 'testing' stamp: 'TVC 6/20/2017 12:32:37'!
 test17CannotModifyCatalogWhenAccessingItsItemsAndPrices
 	| catalogItemsAndPrices oldCatalog |
 	oldCatalog := catalog copy.
@@ -124,7 +124,7 @@ test17CannotModifyCatalogWhenAccessingItsItemsAndPrices
 	self assert: oldCatalog equals: catalog.
 	! !
 
-!XXXTest methodsFor: 'testing' stamp: 'TVC 6/20/2017 12:42:26'!
+!TusLibrosTest methodsFor: 'testing' stamp: 'TVC 6/20/2017 12:42:26'!
 test18CannotModifyPriceOfAnItemThatDoesNotBelongToTheCatalog
 	| oldCatalog |
 	oldCatalog := catalog copy.
@@ -134,7 +134,7 @@ test18CannotModifyPriceOfAnItemThatDoesNotBelongToTheCatalog
 		].
 	! !
 
-!XXXTest methodsFor: 'testing' stamp: 'TVC 6/25/2017 20:28:37'!
+!TusLibrosTest methodsFor: 'testing' stamp: 'TVC 6/25/2017 20:28:37'!
 test19CannotCheckoutACartWithAnExpiredCreditCard
 	cart add: donQuijote.
 	self should: [cashier checkout: cart payingWith: anExpiredCreditCard on: today through: merchantProcessorClientStub] raise: Error - MessageNotUnderstood withExceptionDo: [:anError |
@@ -143,7 +143,7 @@ test19CannotCheckoutACartWithAnExpiredCreditCard
 		].
 	! !
 
-!XXXTest methodsFor: 'testing' stamp: 'TVC 6/25/2017 20:28:43'!
+!TusLibrosTest methodsFor: 'testing' stamp: 'TVC 6/25/2017 20:28:43'!
 test20DoingACorrectCheckoutCreatesASale
 	cart add: donQuijote.
 	cart add: madameBovary.
@@ -152,7 +152,7 @@ test20DoingACorrectCheckoutCreatesASale
 	self assert: salesBook amountOfSales equals: 1.
 	! !
 
-!XXXTest methodsFor: 'testing' stamp: 'TVC 6/25/2017 20:28:55'!
+!TusLibrosTest methodsFor: 'testing' stamp: 'TVC 6/25/2017 20:28:55'!
 test21CannotCheckoutACartInTwoMonthsFromNowWithAValidCreditCardTodayButThatExpiresNextMonth
 	| twoMonthsFromNow twoMonthsFromNowDate |
 	twoMonthsFromNow := GregorianMonthOfYear current next next.
@@ -166,14 +166,14 @@ test21CannotCheckoutACartInTwoMonthsFromNowWithAValidCreditCardTodayButThatExpir
 		].
 	! !
 
-!XXXTest methodsFor: 'testing' stamp: 'TVC 6/25/2017 20:29:00'!
+!TusLibrosTest methodsFor: 'testing' stamp: 'TVC 6/25/2017 20:29:00'!
 test22CheckoutCreatesASaleThatIsRelatedToTheCashiersCustomerAndTheCreditCardAndDateUsedInTheTransaction
 	cart add: donQuijote.
 	cashier checkout: cart payingWith: aValidCreditCard on: today through: merchantProcessorClientStub.
 	self shouldnt: [salesBook detect: [:aSale | aSale wasMadeBy: customer payingWith: aValidCreditCard on: today]] raise: Error description: 'Object is not in the collection.'.
 	! !
 
-!XXXTest methodsFor: 'testing' stamp: 'TVC 6/25/2017 20:29:04'!
+!TusLibrosTest methodsFor: 'testing' stamp: 'TVC 6/25/2017 20:29:04'!
 test23WhenModifyingTheCatalogASaleHasBeenCreatedWithTheSaleCatalogIsNotModified
 	| aSale oldCatalog |
 	cart add: donQuijote.
@@ -183,7 +183,7 @@ test23WhenModifyingTheCatalogASaleHasBeenCreatedWithTheSaleCatalogIsNotModified
 	catalog addItem: itemThatDoesNotBelongToEditorial withPrice: 20.
 	self assert: aSale catalog equals: oldCatalog.! !
 
-!XXXTest methodsFor: 'testing' stamp: 'TVC 6/25/2017 20:29:08'!
+!TusLibrosTest methodsFor: 'testing' stamp: 'TVC 6/25/2017 20:29:08'!
 test24SalesBookCanListPurchasesForACustomer
 	| purchases |
 	cart add: donQuijote.
@@ -192,7 +192,7 @@ test24SalesBookCanListPurchasesForACustomer
 	self assert: purchases size equals: 1.
 	self assert: purchases first equals: (Sale forProducts: cart items andCatalog: catalog andCustomer: customer payingWith: aValidCreditCard on: today).! !
 
-!XXXTest methodsFor: 'testing' stamp: 'TVC 6/25/2017 20:29:12'!
+!TusLibrosTest methodsFor: 'testing' stamp: 'TVC 6/25/2017 20:29:12'!
 test25CannotCheckoutIfTheCreditCardHasBeenStolen
 	cart add: donQuijote.
 	self should: [cashier checkout: cart payingWith: aStolenCreditCard on: today through: merchantProcessorClientStub] raise: Error - MessageNotUnderstood withExceptionDo: [:anError | 
@@ -200,17 +200,17 @@ test25CannotCheckoutIfTheCreditCardHasBeenStolen
 		self assert: salesBook amountOfSales equals: 0.
 		]! !
 
-!XXXTest methodsFor: 'testing' stamp: 'TVC 6/25/2017 20:08:05'!
+!TusLibrosTest methodsFor: 'testing' stamp: 'TVC 6/25/2017 20:08:05'!
 test26ACorrectDebitFromCardsThroughTheMerchantProcessorRespondsASuccessMessage
 	self assert: (merchantProcessorClientStub debitFrom: aValidCreditCard forTransactionAmount: 100) equals: merchantProcessorClientStub class genericSuccessMessage.! !
 
-!XXXTest methodsFor: 'testing' stamp: 'TVC 6/25/2017 20:17:07'!
+!TusLibrosTest methodsFor: 'testing' stamp: 'TVC 6/25/2017 20:17:07'!
 test27AnIncorrectDebitFromCreditCardThroughTheMerchantProcessorRaisesAnError
 	self should: [errorMerchantProcessorClientStub debitFrom: aValidCreditCard forTransactionAmount: 100] raise: Error - MessageNotUnderstood withExceptionDo: [:anError | 
 			self assert: anError messageText equals: errorMerchantProcessorClientStub class genericErrorDescription
 			].! !
 
-!XXXTest methodsFor: 'testing' stamp: 'TVC 6/25/2017 20:29:27'!
+!TusLibrosTest methodsFor: 'testing' stamp: 'TVC 6/25/2017 20:29:27'!
 test28DoingACheckoutWithAMerchantProcessorThatRaisesAnErrorDoesNotCompleteTheCheckout
 	cart add: donQuijote.
 	self should: [cashier checkout: cart payingWith: aValidCreditCard on: today through: errorMerchantProcessorClientStub] raise: Error - MessageNotUnderstood withExceptionDo: [:anError | 
@@ -218,14 +218,14 @@ test28DoingACheckoutWithAMerchantProcessorThatRaisesAnErrorDoesNotCompleteTheChe
 		self assert: salesBook amountOfSales equals: 0.
 		].! !
 
-!XXXTest methodsFor: 'testing' stamp: 'TVC 6/26/2017 22:06:44'!
+!TusLibrosTest methodsFor: 'testing' stamp: 'TVC 6/26/2017 22:06:44'!
 test29APIAllowsCreatingACartForAnExistentClient
 	| newCartId |
 	newCartId := tusLibrosAPI createCartWithClientId: testClientId andPassword: testClientPassword withCatalog: catalog.
 	self assert: 1 equals: (tusLibrosAPI amountOfCartsForClient: testClientId).
 	self assert: ((tusLibrosAPI cartsIdsForClient: testClientId) includes: newCartId).! !
 
-!XXXTest methodsFor: 'testing' stamp: 'TVC 6/26/2017 22:07:00'!
+!TusLibrosTest methodsFor: 'testing' stamp: 'TVC 6/26/2017 22:07:00'!
 test30APIAllowsCreatingMultipleCartsForAnExistentClient
 	| aCartId anotherCartId cartRegistryForTestClient |
 	aCartId := tusLibrosAPI createCartWithClientId: testClientId andPassword: testClientPassword withCatalog: catalog.
@@ -235,29 +235,94 @@ test30APIAllowsCreatingMultipleCartsForAnExistentClient
 	self assert: (cartRegistryForTestClient includes: aCartId).
 	self assert: (cartRegistryForTestClient includes: anotherCartId).! !
 
-!XXXTest methodsFor: 'testing' stamp: 'TVC 6/26/2017 22:07:08'!
+!TusLibrosTest methodsFor: 'testing' stamp: 'TVC 6/26/2017 22:07:08'!
 test31APIDoesNotAllowCreatingCartsForAnNonExistentClient
 	self should: [tusLibrosAPI createCartWithClientId: nonExistentClientId andPassword: nonExistentClientPassword withCatalog: catalog] raise: Error - MessageNotUnderstood withExceptionDo: [:anError | 
 		self assert: tusLibrosAPI class errorMessageWhenCreatingCartForANonExistentClient equals: anError messageText.
 		self assert: 0 equals: (tusLibrosAPI amountOfCartsForClient: nonExistentClientId).
 		]! !
 
-!XXXTest methodsFor: 'testing' stamp: 'TVC 6/26/2017 22:07:17'!
+!TusLibrosTest methodsFor: 'testing' stamp: 'TVC 6/26/2017 22:07:17'!
 test32APIDoesNotAllowCreatingCartsForAnUnauthorizedExistentClient
 	self should: [tusLibrosAPI createCartWithClientId: testClientId andPassword: 'fruta' withCatalog: catalog] raise: Error - MessageNotUnderstood withExceptionDo: [:anError | 
 		self assert: tusLibrosAPI class errorMessageWhenCreatingCartForAnUnauthorizedExistentClient equals: anError messageText.
 		self assert: 0 equals: (tusLibrosAPI amountOfCartsForClient: testClientId).
 		]! !
 
-!XXXTest methodsFor: 'testing' stamp: 'TVC 6/26/2017 23:34:14'!
+!TusLibrosTest methodsFor: 'testing' stamp: 'GDS 6/27/2017 16:25:57'!
 test33APIAllowsAddingOneSampleOfABookToAnExistentCart
 	| newCartId |
 	newCartId := tusLibrosAPI createCartWithClientId: testClientId andPassword: testClientPassword withCatalog: catalog.
 	tusLibrosAPI addToCart: newCartId book: donQuijote withOccurrences: 1.
-	self assert: (tusLibrosAPI cartForClient: testClientId withCartId: newCartId)! !
+	self assert: (tusLibrosAPI cartForClient: testClientId withCartId: newCartId hasBook: donQuijote withOccurrences: 1) ! !
+
+!TusLibrosTest methodsFor: 'testing' stamp: 'GDS 6/27/2017 16:42:29'!
+test34APIAllowsAddingMultipleSampleOfABookToAnExistentCart
+	| newCartId |
+	newCartId := tusLibrosAPI createCartWithClientId: testClientId andPassword: testClientPassword withCatalog: catalog.
+	tusLibrosAPI addToCart: newCartId book: donQuijote withOccurrences: 2.
+	self assert: (tusLibrosAPI cartForClient: testClientId withCartId: newCartId hasBook: donQuijote withOccurrences: 2). ! !
+
+!TusLibrosTest methodsFor: 'testing' stamp: 'GDS 6/27/2017 16:50:32'!
+test35APIDoesNotAllowAddingABookToAnNonExistentCart
+	| newCartId |
+	newCartId := 'Invalid cart id'.
+	self should: [tusLibrosAPI addToCart: newCartId book: donQuijote withOccurrences: 1.] 
+		raise: Error - MessageNotUnderstood 
+		withExceptionDo: [:anError | 
+			self assert: tusLibrosAPI class errorMessageWhenTryingToAddABookToANonExistentCart equals: anError messageText.
+			self assert: 0 equals: (tusLibrosAPI allCarts) size.
+		].! !
+
+!TusLibrosTest methodsFor: 'testing' stamp: 'GDS 6/27/2017 17:03:23'!
+test36APIAllowsToListCartItems
+	| newCartId listedCartItems |
+	newCartId := tusLibrosAPI createCartWithClientId: testClientId andPassword: testClientPassword withCatalog: catalog.
+	tusLibrosAPI addToCart: newCartId book: donQuijote withOccurrences: 3.
+	tusLibrosAPI addToCart: newCartId book: madameBovary withOccurrences: 1.
+	listedCartItems := tusLibrosAPI listCartWithId: newCartId.
+	
+	self assert: 4 equals: listedCartItems size.
+	self assert: 3 equals: (listedCartItems occurrencesOf: donQuijote ).
+	self assert: 1 equals: (listedCartItems occurrencesOf: madameBovary ).
+! !
+
+!TusLibrosTest methodsFor: 'testing' stamp: 'GDS 6/27/2017 17:05:26'!
+test37APIDoesNotAllowToListCartItemsOfANonExistentCart
+
+	self should: [tusLibrosAPI listCartWithId: 'Invalid cart id'.] 
+		raise: Error - MessageNotUnderstood 
+		withExceptionDo: [:anError | 
+			self assert: tusLibrosAPI class errorMessageWhenListingItemsForANonExistentCart equals: anError messageText.
+		].! !
+
+!TusLibrosTest methodsFor: 'testing' stamp: 'GDS 6/27/2017 17:36:04'!
+test38APIAllowsToCheckoutACartWithACreditCard
+	| newCartId |
+	newCartId := tusLibrosAPI createCartWithClientId: testClientId andPassword: testClientPassword withCatalog: catalog.
+	tusLibrosAPI addToCart: newCartId book: donQuijote withOccurrences: 3.
+	tusLibrosAPI addToCart: newCartId book: madameBovary withOccurrences: 1.
+	tusLibrosAPI	checkoutCartWithId: newCartId andCreditCard: aValidCreditCard withCatalog: catalog andSalesBook: salesBook through: merchantProcessorClientStub .
+	self assert: 1 equals: tusLibrosAPI purchases size
+
+! !
+
+!TusLibrosTest methodsFor: 'testing' stamp: 'GDS 6/27/2017 18:04:24'!
+test39APIAllowsToListAClientsPurchases
+	| newCartId purchases |
+	newCartId := tusLibrosAPI createCartWithClientId: testClientId andPassword: testClientPassword withCatalog: catalog.
+	tusLibrosAPI addToCart: newCartId book: donQuijote withOccurrences: 3.
+	tusLibrosAPI addToCart: newCartId book: madameBovary withOccurrences: 1.
+	tusLibrosAPI	checkoutCartWithId: newCartId andCreditCard: aValidCreditCard withCatalog: catalog andSalesBook: salesBook through: merchantProcessorClientStub .
+	
+	purchases := tusLibrosAPI listPurchasesForClient: testClientId withPassword: testClientPassword .
+	self assert: 1 equals: purchases size.
+	self assert: (donQuijotePrice * 3 + madameBovaryPrice) equals: purchases first value value "horrible".
+
+! !
 
 
-!XXXTest methodsFor: 'setUp' stamp: 'TVC 6/26/2017 21:19:13'!
+!TusLibrosTest methodsFor: 'setUp' stamp: 'TVC 6/26/2017 21:19:13'!
 setUp
 	today := Date today.
 	thisMonth := GregorianMonthOfYear current.
@@ -318,9 +383,17 @@ size
 	^ items size! !
 
 
+!Cart methodsFor: 'testing' stamp: 'GDS 6/27/2017 16:00:46'!
+hasItem: anItem
+	^ items includes: anItem! !
+
 !Cart methodsFor: 'testing' stamp: 'GDS 6/13/2017 19:53:49'!
 isEmpty
 	^ items isEmpty! !
+
+!Cart methodsFor: 'testing' stamp: 'GDS 6/27/2017 16:07:03'!
+ocurrencesOf: anItem 
+	^ items occurrencesOf: anItem ! !
 
 
 !Cart methodsFor: 'adding' stamp: 'GDS 6/15/2017 20:30:50'!
@@ -399,7 +472,7 @@ checkThatCreditCardIsValid: aCreditCard on: aDate
 	self checkThatCreditCard: aCreditCard IsNotExpiredOn: aDate.
 	self checkThatCreditCardIsNotStolen: aCreditCard.! !
 
-!Cashier methodsFor: 'checkout' stamp: 'TVC 6/25/2017 20:31:49'!
+!Cashier methodsFor: 'checkout' stamp: 'GDS 6/27/2017 17:49:41'!
 checkout: aCart payingWith: aCreditCard on: aDate through: aMerchantProcessorClient
 	| totalCost |
 	
@@ -415,8 +488,7 @@ checkout: aCart payingWith: aCreditCard on: aDate through: aMerchantProcessorCli
 	
 	self writeInSalesBookASaleForCart: aCart payingWith: aCreditCard on: aDate.
 	
-	^ totalCost.! !
-
+	^ Association key: aCart items value: totalCost.! !
 
 
 !Cashier methodsFor: 'as yet unclassified' stamp: 'TVC 6/25/2017 16:55:58'!
@@ -531,7 +603,6 @@ checkThatAnItem: anItem isValidToBeAddedWithPrice: aPrice
 !classDefinition: 'Catalog class' category: #'TusLibros-Solution'!
 Catalog class
 	instanceVariableNames: ''!
-
 
 !Catalog class methodsFor: 'error messages' stamp: 'TVC 6/20/2017 11:53:15'!
 errorMessageWhenAddingAnItemThatIsAlreadyInTheCatalog
@@ -747,10 +818,41 @@ detect: aBlockClosure
 
 !classDefinition: #TusLibrosAPI category: #'TusLibros-Solution'!
 Object subclass: #TusLibrosAPI
-	instanceVariableNames: 'cartRegistry nextCartId clientRegistry'
+	instanceVariableNames: 'cartRegistry nextCartId clientRegistry nextSaleId salesRegistry'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TusLibros-Solution'!
+
+!TusLibrosAPI methodsFor: 'endpoints' stamp: 'GDS 6/27/2017 16:22:31'!
+addToCart: aCartId book: aBook withOccurrences: anAmountOfOcurrences 
+	| cartForId |
+
+	cartForId := (cartRegistry detect: [:cartsForClient | (cartsForClient select: [:cart | cart key = aCartId]) size = 1] ifNone:[self error: self class errorMessageWhenTryingToAddABookToANonExistentCart]) first value.
+	^ cartForId add: aBook withOccurrences: anAmountOfOcurrences.
+	! !
+
+!TusLibrosAPI methodsFor: 'endpoints' stamp: 'GDS 6/27/2017 17:43:53'!
+checkoutCartWithId: aCartId andCreditCard: aCreditCard withCatalog: aCatalog andSalesBook: aSalesBook through: aMerchantProcessorClient 
+	"Falta catchear las excepciones del modelo y traducirlas para la capa externa de la interfaz."
+	
+	| cart cashier clientId ticket |
+	cart := self cartWithId: aCartId .
+	clientId := self clientIdForCartId: aCartId.
+	cashier := Cashier withCatalog: aCatalog andSalesBook: aSalesBook forCustomer: aCreditCard owner.
+
+	ticket := cashier checkout: cart payingWith: aCreditCard on: Date today through: aMerchantProcessorClient.
+	
+	salesRegistry at: clientId 
+	ifPresent: [ :salesForClient |
+				 salesForClient add: (Association key: nextSaleId value: ticket).
+				 salesRegistry at: clientId put: salesForClient] 
+	ifAbsent: [ | newSalesCollection |
+				 newSalesCollection := OrderedCollection new.
+				 newSalesCollection add: (Association key: nextSaleId value: ticket).
+				 salesRegistry at: clientId put: newSalesCollection].
+	
+	nextSaleId := nextSaleId + 1.
+	^ nextSaleId - 1.! !
 
 !TusLibrosAPI methodsFor: 'endpoints' stamp: 'TVC 6/26/2017 22:06:16'!
 createCartWithClientId: aClientId andPassword: aPassword withCatalog: aCatalog
@@ -758,6 +860,18 @@ createCartWithClientId: aClientId andPassword: aPassword withCatalog: aCatalog
 	self checkThatClientIsAuthorized: aClientId withPassword: aPassword.
 
 	^ self addCartToClient: aClientId withCatalog: aCatalog.! !
+
+!TusLibrosAPI methodsFor: 'endpoints' stamp: 'GDS 6/27/2017 17:08:55'!
+listCartWithId: aCartId
+	[^ (self cartWithId: aCartId) items] on: Error do: [ self error:  self class errorMessageWhenListingItemsForANonExistentCart ].
+	! !
+
+!TusLibrosAPI methodsFor: 'endpoints' stamp: 'GDS 6/27/2017 17:48:55'!
+listPurchasesForClient: aClientId withPassword: aPassword 
+	self checkThatClientExists: aClientId.
+	self checkThatClientIsAuthorized: aClientId withPassword: aPassword.
+	
+	^ salesRegistry at: aClientId! !
 
 
 !TusLibrosAPI methodsFor: 'adding cart' stamp: 'TVC 6/26/2017 22:05:50'!
@@ -775,20 +889,52 @@ addCartToClient: aClientId withCatalog: aCatalog
 	^ nextCartId - 1! !
 
 
-!TusLibrosAPI methodsFor: 'initialization' stamp: 'TVC 6/26/2017 19:52:58'!
+!TusLibrosAPI methodsFor: 'initialization' stamp: 'GDS 6/27/2017 17:32:22'!
 initializeWithClientRegistry: aClientRegistry
 	cartRegistry := Dictionary new.
+	salesRegistry := Dictionary new.
 	clientRegistry := aClientRegistry.
-	nextCartId := 1.! !
+	nextCartId := 1.
+	nextSaleId := 1.! !
 
+
+!TusLibrosAPI methodsFor: 'accessing' stamp: 'GDS 6/27/2017 16:50:50'!
+allCarts
+	| allCarts |
+	allCarts := OrderedCollection new.
+	cartRegistry do: [:cartsForClient | allCarts addAllLast: (cartsForClient collect: [ :idCartAssociaton | idCartAssociaton value ])].
+	^ allCarts! !
 
 !TusLibrosAPI methodsFor: 'accessing' stamp: 'TVC 6/26/2017 19:37:04'!
 amountOfCartsForClient: aClientId
 	cartRegistry at: aClientId ifPresent: [:cartsForClient | ^ cartsForClient size] ifAbsent: [^ 0]! !
 
+!TusLibrosAPI methodsFor: 'accessing' stamp: 'GDS 6/27/2017 17:10:45'!
+cartWithId: aCartId
+	cartRegistry do: [:cartsForClient | cartsForClient detect: [ :idCartAssociaton | idCartAssociaton key = aCartId ] ifFound: [:idCartAssociation | ^ idCartAssociation value] ifNone: [ self error: (self class errorMessageCouldntFindCartWithId: aCartId)]].! !
+
+!TusLibrosAPI methodsFor: 'accessing' stamp: 'GDS 6/27/2017 16:10:17'!
+cartWithId: aCartId forClientId: aClientId
+	| cartsForClient |
+	cartsForClient := cartRegistry at: aClientId.
+	^ (cartsForClient select: [:cart | cart key = aCartId]) first value.
+	
+	! !
+
 !TusLibrosAPI methodsFor: 'accessing' stamp: 'TVC 6/26/2017 23:22:46'!
 cartsIdsForClient: aClientId
 	^ (cartRegistry at: aClientId) collect: [:idCartAssociation | idCartAssociation key]! !
+
+!TusLibrosAPI methodsFor: 'accessing' stamp: 'GDS 6/27/2017 17:34:44'!
+clientIdForCartId: aCartId
+	cartRegistry associationsDo: [:clientIdCartsForClientAssociation | clientIdCartsForClientAssociation value detect: [ :idCartAssociaton | idCartAssociaton key = aCartId ] ifFound: [:idCartAssociation | ^ clientIdCartsForClientAssociation key] ifNone: [ self error: (self class errorMessageCouldntFindCartWithId: aCartId)]].! !
+
+!TusLibrosAPI methodsFor: 'accessing' stamp: 'GDS 6/27/2017 17:40:34'!
+purchases
+	| purchases |
+	purchases := OrderedCollection new.
+	salesRegistry do: [:purchasesPerClient | purchases addAllLast: (purchasesPerClient collect: [ :idSaleAssociation | idSaleAssociation value])].
+	^ purchases! !
 
 
 !TusLibrosAPI methodsFor: 'validations' stamp: 'TVC 6/26/2017 20:03:58'!
@@ -798,6 +944,13 @@ checkThatClientExists: aClientId
 !TusLibrosAPI methodsFor: 'validations' stamp: 'TVC 6/26/2017 20:02:57'!
 checkThatClientIsAuthorized: aClientId withPassword: aPassword
 	((clientRegistry at: aClientId) = aPassword) ifFalse: [self error: self class errorMessageWhenCreatingCartForAnUnauthorizedExistentClient].! !
+
+
+!TusLibrosAPI methodsFor: 'testing' stamp: 'GDS 6/27/2017 16:11:13'!
+cartForClient: aClientId withCartId: aCartId hasBook: aBook withOccurrences: anAmountOfOccurrences 
+	| cartForId |
+	cartForId := self cartWithId: aCartId forClientId: aClientId.
+	^ (cartForId hasItem: aBook) and: [(cartForId ocurrencesOf: aBook) = anAmountOfOccurrences ].! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -810,6 +963,10 @@ newWithClientRegistry: aClientRegistry
 	^ self new initializeWithClientRegistry: aClientRegistry.! !
 
 
+!TusLibrosAPI class methodsFor: 'error messages' stamp: 'GDS 6/27/2017 17:11:04'!
+errorMessageCouldntFindCartWithId: aCartId
+	^ 'Cannot find a cart with id: ' , aCartId ! !
+
 !TusLibrosAPI class methodsFor: 'error messages' stamp: 'TVC 6/26/2017 19:44:38'!
 errorMessageWhenCreatingCartForANonExistentClient
 	^ 'Cannot create a cart for a non-existent client'! !
@@ -817,3 +974,11 @@ errorMessageWhenCreatingCartForANonExistentClient
 !TusLibrosAPI class methodsFor: 'error messages' stamp: 'TVC 6/26/2017 19:57:14'!
 errorMessageWhenCreatingCartForAnUnauthorizedExistentClient
 	^ 'Cannot create a cart for an unauthorized existent client'! !
+
+!TusLibrosAPI class methodsFor: 'error messages' stamp: 'GDS 6/27/2017 17:09:19'!
+errorMessageWhenListingItemsForANonExistentCart
+	^ 'Cannot list cart items for a non existent cart'! !
+
+!TusLibrosAPI class methodsFor: 'error messages' stamp: 'GDS 6/27/2017 16:19:33'!
+errorMessageWhenTryingToAddABookToANonExistentCart
+	^ 'Cannot add a book to a non existent cart'! !
