@@ -1,6 +1,6 @@
 !classDefinition: #XXXTest category: #'TusLibros-Solution'!
 TestCase subclass: #XXXTest
-	instanceVariableNames: 'cart catalog cashier donQuijotePrice donQuijote itemThatDoesNotBelongToEditorial madameBovary madameBovaryPrice anExpiredCreditCard aValidCreditCard salesBook thisMonth today nextMonth lastMonth customer aStolenCreditCard anotherCustomer merchantProcessorClientStub errorMerchantProcessorClientStub'
+	instanceVariableNames: 'cart catalog cashier donQuijotePrice donQuijote itemThatDoesNotBelongToEditorial madameBovary madameBovaryPrice anExpiredCreditCard aValidCreditCard salesBook thisMonth today nextMonth lastMonth customer aStolenCreditCard anotherCustomer merchantProcessorClientStub errorMerchantProcessorClientStub testClientId testClientPassword nonExistentClientId nonExistentClientPassword clientRegistry tusLibrosAPI'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TusLibros-Solution'!
@@ -218,8 +218,46 @@ test28DoingACheckoutWithAMerchantProcessorThatRaisesAnErrorDoesNotCompleteTheChe
 		self assert: salesBook amountOfSales equals: 0.
 		].! !
 
+!XXXTest methodsFor: 'testing' stamp: 'TVC 6/26/2017 22:06:44'!
+test29APIAllowsCreatingACartForAnExistentClient
+	| newCartId |
+	newCartId := tusLibrosAPI createCartWithClientId: testClientId andPassword: testClientPassword withCatalog: catalog.
+	self assert: 1 equals: (tusLibrosAPI amountOfCartsForClient: testClientId).
+	self assert: ((tusLibrosAPI cartsIdsForClient: testClientId) includes: newCartId).! !
 
-!XXXTest methodsFor: 'setUp' stamp: 'TVC 6/25/2017 20:19:56'!
+!XXXTest methodsFor: 'testing' stamp: 'TVC 6/26/2017 22:07:00'!
+test30APIAllowsCreatingMultipleCartsForAnExistentClient
+	| aCartId anotherCartId cartRegistryForTestClient |
+	aCartId := tusLibrosAPI createCartWithClientId: testClientId andPassword: testClientPassword withCatalog: catalog.
+	anotherCartId := tusLibrosAPI createCartWithClientId: testClientId andPassword: testClientPassword withCatalog: catalog.
+	cartRegistryForTestClient := tusLibrosAPI cartsIdsForClient: testClientId.
+	self assert: 2 equals: (tusLibrosAPI amountOfCartsForClient: testClientId).
+	self assert: (cartRegistryForTestClient includes: aCartId).
+	self assert: (cartRegistryForTestClient includes: anotherCartId).! !
+
+!XXXTest methodsFor: 'testing' stamp: 'TVC 6/26/2017 22:07:08'!
+test31APIDoesNotAllowCreatingCartsForAnNonExistentClient
+	self should: [tusLibrosAPI createCartWithClientId: nonExistentClientId andPassword: nonExistentClientPassword withCatalog: catalog] raise: Error - MessageNotUnderstood withExceptionDo: [:anError | 
+		self assert: tusLibrosAPI class errorMessageWhenCreatingCartForANonExistentClient equals: anError messageText.
+		self assert: 0 equals: (tusLibrosAPI amountOfCartsForClient: nonExistentClientId).
+		]! !
+
+!XXXTest methodsFor: 'testing' stamp: 'TVC 6/26/2017 22:07:17'!
+test32APIDoesNotAllowCreatingCartsForAnUnauthorizedExistentClient
+	self should: [tusLibrosAPI createCartWithClientId: testClientId andPassword: 'fruta' withCatalog: catalog] raise: Error - MessageNotUnderstood withExceptionDo: [:anError | 
+		self assert: tusLibrosAPI class errorMessageWhenCreatingCartForAnUnauthorizedExistentClient equals: anError messageText.
+		self assert: 0 equals: (tusLibrosAPI amountOfCartsForClient: testClientId).
+		]! !
+
+!XXXTest methodsFor: 'testing' stamp: 'TVC 6/26/2017 23:34:14'!
+test33APIAllowsAddingOneSampleOfABookToAnExistentCart
+	| newCartId |
+	newCartId := tusLibrosAPI createCartWithClientId: testClientId andPassword: testClientPassword withCatalog: catalog.
+	tusLibrosAPI addToCart: newCartId book: donQuijote withOccurrences: 1.
+	self assert: (tusLibrosAPI cartForClient: testClientId withCartId: newCartId)! !
+
+
+!XXXTest methodsFor: 'setUp' stamp: 'TVC 6/26/2017 21:19:13'!
 setUp
 	today := Date today.
 	thisMonth := GregorianMonthOfYear current.
@@ -232,10 +270,10 @@ setUp
 	madameBovaryPrice := 7.5.
 	itemThatDoesNotBelongToEditorial := 'OOP for Dummies'.
 	
-	catalog := Catalog newXXX.
+	catalog := Catalog new.
 	catalog addItem: donQuijote withPrice: donQuijotePrice.
 	catalog addItem: madameBovary withPrice: madameBovaryPrice.
-	salesBook := SalesBook newXXX.
+	salesBook := SalesBook new.
 	
 	cart := Cart newWithCatalog: catalog.
 	customer := 'Pepe'.	
@@ -246,8 +284,16 @@ setUp
 	aStolenCreditCard := CreditCard newFor: '345678' andExpires: nextMonth forOwner: anotherCustomer.
 	
 	merchantProcessorClientStub := MerchantProcessorClientStub newWithStubbedResponse: [MerchantProcessorClientStub genericSuccessMessage].
-	errorMerchantProcessorClientStub := MerchantProcessorClientStub newWithStubbedResponse: [self error: MerchantProcessorClientStub genericErrorDescription]
-! !
+	errorMerchantProcessorClientStub := MerchantProcessorClientStub newWithStubbedResponse: [self error: MerchantProcessorClientStub genericErrorDescription].
+	
+	testClientId := 123.
+	testClientPassword := 'default'.
+	nonExistentClientId := -1.
+	nonExistentClientPassword := '123asdholamundo'.
+	
+	clientRegistry := Dictionary new.
+	clientRegistry at: testClientId put: testClientPassword .
+	tusLibrosAPI := TusLibrosAPI newWithClientRegistry: clientRegistry.! !
 
 
 !classDefinition: #Cart category: #'TusLibros-Solution'!
@@ -486,10 +532,6 @@ checkThatAnItem: anItem isValidToBeAddedWithPrice: aPrice
 Catalog class
 	instanceVariableNames: ''!
 
-!Catalog class methodsFor: 'as yet unclassified' stamp: 'TVC 6/18/2017 18:47:06'!
-newXXX
-	^ self new initialize.! !
-
 
 !Catalog class methodsFor: 'error messages' stamp: 'TVC 6/20/2017 11:53:15'!
 errorMessageWhenAddingAnItemThatIsAlreadyInTheCatalog
@@ -702,12 +744,76 @@ isEmpty
 detect: aBlockClosure
 	^ sales detect: aBlockClosure! !
 
+
+!classDefinition: #TusLibrosAPI category: #'TusLibros-Solution'!
+Object subclass: #TusLibrosAPI
+	instanceVariableNames: 'cartRegistry nextCartId clientRegistry'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'TusLibros-Solution'!
+
+!TusLibrosAPI methodsFor: 'endpoints' stamp: 'TVC 6/26/2017 22:06:16'!
+createCartWithClientId: aClientId andPassword: aPassword withCatalog: aCatalog
+	self checkThatClientExists: aClientId.
+	self checkThatClientIsAuthorized: aClientId withPassword: aPassword.
+
+	^ self addCartToClient: aClientId withCatalog: aCatalog.! !
+
+
+!TusLibrosAPI methodsFor: 'adding cart' stamp: 'TVC 6/26/2017 22:05:50'!
+addCartToClient: aClientId withCatalog: aCatalog
+	cartRegistry at: aClientId 
+		ifPresent: [ :cartsForClient |
+					 cartsForClient add: (Association key: nextCartId value: (Cart newWithCatalog: aCatalog)).
+					 cartRegistry at: aClientId put: cartsForClient] 
+		ifAbsent: [ | newCartCollection |
+					 newCartCollection := OrderedCollection new.
+					 newCartCollection add: (Association key: nextCartId value: (Cart newWithCatalog: aCatalog)).
+					 cartRegistry at: aClientId put: newCartCollection].
+
+	nextCartId := nextCartId + 1.
+	^ nextCartId - 1! !
+
+
+!TusLibrosAPI methodsFor: 'initialization' stamp: 'TVC 6/26/2017 19:52:58'!
+initializeWithClientRegistry: aClientRegistry
+	cartRegistry := Dictionary new.
+	clientRegistry := aClientRegistry.
+	nextCartId := 1.! !
+
+
+!TusLibrosAPI methodsFor: 'accessing' stamp: 'TVC 6/26/2017 19:37:04'!
+amountOfCartsForClient: aClientId
+	cartRegistry at: aClientId ifPresent: [:cartsForClient | ^ cartsForClient size] ifAbsent: [^ 0]! !
+
+!TusLibrosAPI methodsFor: 'accessing' stamp: 'TVC 6/26/2017 23:22:46'!
+cartsIdsForClient: aClientId
+	^ (cartRegistry at: aClientId) collect: [:idCartAssociation | idCartAssociation key]! !
+
+
+!TusLibrosAPI methodsFor: 'validations' stamp: 'TVC 6/26/2017 20:03:58'!
+checkThatClientExists: aClientId
+	(clientRegistry includesKey: aClientId) ifFalse: [self error: self class errorMessageWhenCreatingCartForANonExistentClient ].! !
+
+!TusLibrosAPI methodsFor: 'validations' stamp: 'TVC 6/26/2017 20:02:57'!
+checkThatClientIsAuthorized: aClientId withPassword: aPassword
+	((clientRegistry at: aClientId) = aPassword) ifFalse: [self error: self class errorMessageWhenCreatingCartForAnUnauthorizedExistentClient].! !
+
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
-!classDefinition: 'SalesBook class' category: #'TusLibros-Solution'!
-SalesBook class
+!classDefinition: 'TusLibrosAPI class' category: #'TusLibros-Solution'!
+TusLibrosAPI class
 	instanceVariableNames: ''!
 
-!SalesBook class methodsFor: 'initialization' stamp: 'TVC 6/25/2017 18:05:50'!
-newXXX
-	^ self new initialize! !
+!TusLibrosAPI class methodsFor: 'instance creation' stamp: 'TVC 6/26/2017 19:52:31'!
+newWithClientRegistry: aClientRegistry
+	^ self new initializeWithClientRegistry: aClientRegistry.! !
+
+
+!TusLibrosAPI class methodsFor: 'error messages' stamp: 'TVC 6/26/2017 19:44:38'!
+errorMessageWhenCreatingCartForANonExistentClient
+	^ 'Cannot create a cart for a non-existent client'! !
+
+!TusLibrosAPI class methodsFor: 'error messages' stamp: 'TVC 6/26/2017 19:57:14'!
+errorMessageWhenCreatingCartForAnUnauthorizedExistentClient
+	^ 'Cannot create a cart for an unauthorized existent client'! !
